@@ -29,31 +29,31 @@ public sealed class VrPlayer : MonoBehaviour {
 		public const string WMR_B_R_PAD_PRESS = "WMR_B_R_PAD_PRESS";
 	}
 
-	void Start () {
+	void Start() {
 		var position = Vector3.zero;
-		position.x = PlayerPrefs.GetFloat ("player_position_x");
-		position.y = PlayerPrefs.GetFloat ("player_position_y");
-		position.z = PlayerPrefs.GetFloat ("player_position_z");
+		position.x = PlayerPrefs.GetFloat("player_position_x");
+		position.y = PlayerPrefs.GetFloat("player_position_y");
+		position.z = PlayerPrefs.GetFloat("player_position_z");
 		transform.position = position;
 	}
 
-	void Update () {
+	void Update() {
 		//		var headPosition = InputTracking.GetLocalPosition(XRNode.CenterEye);
 		//		var headRotation = InputTracking.GetLocalRotation(XRNode.CenterEye);
 		//		HeadTrans.localPosition = headPosition;
 		//		HeadTrans.localRotation = headRotation;
 
-		var lHandPosition = InputTracking.GetLocalPosition (XRNode.LeftHand);
-		var lHandRotation = InputTracking.GetLocalRotation (XRNode.LeftHand);
+		var lHandPosition = InputTracking.GetLocalPosition(XRNode.LeftHand);
+		var lHandRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
 		//		LHandTrans.localPosition = lHandPosition;
 		//		LHandTrans.localRotation = lHandRotation;
-		lHandTrans.localPosition = Vector3.Lerp (lHandTrans.localPosition, lHandPosition, Time.deltaTime * damping);
-		lHandTrans.localRotation = Quaternion.Slerp (lHandTrans.localRotation, lHandRotation, Time.deltaTime * rotationDamping);
+		lHandTrans.localPosition = Vector3.Lerp(lHandTrans.localPosition, lHandPosition, Time.deltaTime * damping);
+		lHandTrans.localRotation = Quaternion.Slerp(lHandTrans.localRotation, lHandRotation, Time.deltaTime * rotationDamping);
 
-		var rHandPosition = InputTracking.GetLocalPosition (XRNode.RightHand);
-		var rHandRotation = InputTracking.GetLocalRotation (XRNode.RightHand);
-		rHandTrans.localPosition = Vector3.Lerp (rHandTrans.localPosition, rHandPosition, Time.deltaTime * damping);
-		rHandTrans.localRotation = Quaternion.Slerp (rHandTrans.localRotation, rHandRotation, Time.deltaTime * rotationDamping);
+		var rHandPosition = InputTracking.GetLocalPosition(XRNode.RightHand);
+		var rHandRotation = InputTracking.GetLocalRotation(XRNode.RightHand);
+		rHandTrans.localPosition = Vector3.Lerp(rHandTrans.localPosition, rHandPosition, Time.deltaTime * damping);
+		rHandTrans.localRotation = Quaternion.Slerp(rHandTrans.localRotation, rHandRotation, Time.deltaTime * rotationDamping);
 		//		RHandTrans.localPosition = rHandPosition;
 		//		RHandTrans.localRotation = rHandRotation;
 
@@ -70,26 +70,26 @@ public sealed class VrPlayer : MonoBehaviour {
 //		}
 	}
 
-	void OnDrawGizmos () {
+	void OnDrawGizmos() {
 		//		var headPosition = InputTracking.GetLocalPosition (XRNode.CenterEye);
 		//		var headRotation = InputTracking.GetLocalRotation (XRNode.CenterEye);
 		//		DrawAnchor (headPosition, headRotation);
 
-		var lHandPosition = InputTracking.GetLocalPosition (XRNode.LeftHand);
-		var lHandRotation = InputTracking.GetLocalRotation (XRNode.LeftHand);
+		var lHandPosition = InputTracking.GetLocalPosition(XRNode.LeftHand);
+		var lHandRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
 		//		DrawAnchor(lHandPosition, lHandRotation, Input.GetAxis(WmrInput.WMR_A_L_GRIP));
-		DrawAnchor (lHandPosition, lHandRotation);
+		DrawAnchor(lHandPosition, lHandRotation);
 
-		var rHandPosition = InputTracking.GetLocalPosition (XRNode.RightHand);
-		var rHandRotation = InputTracking.GetLocalRotation (XRNode.RightHand);
-		DrawAnchor (rHandPosition, rHandRotation);
+		var rHandPosition = InputTracking.GetLocalPosition(XRNode.RightHand);
+		var rHandRotation = InputTracking.GetLocalRotation(XRNode.RightHand);
+		DrawAnchor(rHandPosition, rHandRotation);
 	}
 
-	static void DrawAnchor (Vector3 position, Quaternion rotation, float length = 0.5f) {
+	static void DrawAnchor(Vector3 position, Quaternion rotation, float length = 0.5f) {
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireSphere (position, 0.1f);
+		Gizmos.DrawWireSphere(position, 0.1f);
 
 		Gizmos.color = Color.red;
-		Gizmos.DrawRay (position, rotation * Vector3.forward * length);
+		Gizmos.DrawRay(position, rotation * Vector3.forward * length);
 	}
 }

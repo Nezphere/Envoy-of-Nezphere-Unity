@@ -14,7 +14,7 @@ public class SwordTip : MonoBehaviour {
 	const float interval = 0.05f;
 	float lastTime;
 
-	void LateUpdate () {
+	void LateUpdate() {
 		var current = Time.time;
 		//		if (current - lastTime < interval) return;
 		
@@ -29,7 +29,7 @@ public class SwordTip : MonoBehaviour {
 		lastPosition = position;
 		lastVelocity = velocity;
 
-		Debug.DrawRay (position, velocity * 0.1f, Color.green);
+		Debug.DrawRay(position, velocity * 0.1f, Color.green);
 		//Debug.DrawRay(position, acceleration, Color.red);
 	}
 }
