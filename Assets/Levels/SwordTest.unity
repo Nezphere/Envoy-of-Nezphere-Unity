@@ -683,6 +683,106 @@ Transform:
   m_Father: {fileID: 645829283}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1098583353
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1098583354}
+  - component: {fileID: 1098583355}
+  - component: {fileID: 1098583357}
+  - component: {fileID: 1098583356}
+  m_Layer: 0
+  m_Name: Base
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1098583354
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1098583353}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 136793922}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1098583355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1098583353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5ceb339997c8304e9354d4ce5ddc9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _emit: 1
+  _emitTime: 0
+  _material: {fileID: 2100000, guid: 9141f1284e7c6a84f8af89374395d38c, type: 2}
+  _lifeTime: 0.1
+  _colors:
+  - {r: 0.9852941, g: 1, b: 1, a: 0.278}
+  - {r: 0.9792781, g: 0.609, b: 1, a: 0.566}
+  - {r: 1, g: 0.60294116, b: 0.67874324, a: 0.459}
+  - {r: 1, g: 0.091, b: 0.264, a: 0.253}
+  - {r: 1, g: 0.17647058, b: 0.25416222, a: 0.097}
+  _sizes: []
+  _minVertexDistance: 0.02
+  _maxVertexDistance: 10
+  _maxAngle: 1
+  _autoDestruct: 0
+  subdivisions: 4
+  _base: {fileID: 1098583354}
+  _tip: {fileID: 151293301}
+--- !u!114 &1098583356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1098583353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03da7c888cdb8e24b820eaff107fd690, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponTrail: {fileID: 1098583357}
+  tip: {fileID: 151293302}
+  minVelocity: 2000
+--- !u!114 &1098583357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1098583353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5ceb339997c8304e9354d4ce5ddc9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _emit: 0
+  _emitTime: 0
+  _material: {fileID: 2100000, guid: 2245d82f5282fcf4abbd3c227245200f, type: 2}
+  _lifeTime: 8
+  _colors: []
+  _sizes:
+  - 0
+  - -0.1
+  _minVertexDistance: 0.02
+  _maxVertexDistance: 10
+  _maxAngle: 1
+  _autoDestruct: 0
+  subdivisions: 4
+  _base: {fileID: 1098583354}
+  _tip: {fileID: 151293301}
 --- !u!1001 &1189756811
 Prefab:
   m_ObjectHideFlags: 0
@@ -1034,7 +1134,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1580424328
+  randomSeed: 1755955932
   InitialModule:
     serializedVersion: 3
     enabled: 1
