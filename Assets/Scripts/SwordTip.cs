@@ -7,7 +7,7 @@ public class SwordTip : MonoBehaviour {
 	}
 
 	public Side side;
-	public float deltaTime;
+	public float deltaTime, speed;
 	public Vector3 position, velocity, acceleration;
 	Vector3 lastPosition, lastVelocity;
 
@@ -28,6 +28,8 @@ public class SwordTip : MonoBehaviour {
 
 		lastPosition = position;
 		lastVelocity = velocity;
+
+		speed = velocity.magnitude;
 
 		Debug.DrawRay(position, velocity * 0.1f, Color.green);
 		//Debug.DrawRay(position, acceleration, Color.red);
