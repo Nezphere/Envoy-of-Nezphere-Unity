@@ -27,7 +27,7 @@ public class SwordTrailSpeedToggle : MonoBehaviour {
 				emission.rateOverTime = new ParticleSystem.MinMaxCurve(activeRateOverDistance);
 //				AudioSource.PlayClipAtPoint(clip, playPoint.position, volume);
 			}
-			particles.Emit(10);
+//			particles.Emit(1);
 		} else {
 			if (weaponTrail.doEmit) {
 				weaponTrail.doEmit = false;

@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4241282900148078}
   - component: {fileID: 114241112532497880}
+  - component: {fileID: 108066873209005042}
   m_Layer: 0
   m_Name: Mid
   m_TagString: Untagged
@@ -53,6 +54,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4271166139600340}
   - component: {fileID: 114711822195515948}
+  - component: {fileID: 108113717220928900}
   m_Layer: 0
   m_Name: Tip
   m_TagString: Untagged
@@ -71,6 +73,7 @@ GameObject:
   - component: {fileID: 114060329703486232}
   - component: {fileID: 114232382621639742}
   - component: {fileID: 114359873870715144}
+  - component: {fileID: 108679458373580658}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -436,8 +439,116 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.06, y: 1.8, z: 0.06}
-  m_Center: {x: 0, y: 1.02, z: 0}
+  m_Size: {x: 0.06, y: 2.1, z: 0.06}
+  m_Center: {x: 0, y: 0.85, z: 0}
+--- !u!108 &108066873209005042
+Light:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1127611001289628}
+  m_Enabled: 0
+  serializedVersion: 8
+  m_Type: 2
+  m_Color: {r: 0.44852942, g: 1, b: 0.86308306, a: 1}
+  m_Intensity: 0.2
+  m_Range: 10
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 0
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+--- !u!108 &108113717220928900
+Light:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1443739203627094}
+  m_Enabled: 0
+  serializedVersion: 8
+  m_Type: 2
+  m_Color: {r: 0.44852942, g: 1, b: 0.86308306, a: 1}
+  m_Intensity: 0.2
+  m_Range: 10
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 0
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+--- !u!108 &108679458373580658
+Light:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1445332968043966}
+  m_Enabled: 0
+  serializedVersion: 8
+  m_Type: 2
+  m_Color: {r: 0.44852942, g: 1, b: 0.86308306, a: 1}
+  m_Intensity: 0.2
+  m_Range: 10
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 0
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!114 &114060329703486232
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -466,14 +577,14 @@ MonoBehaviour:
     ctime0: 0
     ctime1: 9830
     ctime2: 19661
-    ctime3: 53006
+    ctime3: 52428
     ctime4: 65535
     ctime5: 65535
     ctime6: 0
     ctime7: 0
     atime0: 0
-    atime1: 15227
-    atime2: 41249
+    atime1: 6554
+    atime2: 22937
     atime3: 65535
     atime4: 65535
     atime5: 0
@@ -505,7 +616,7 @@ MonoBehaviour:
   trailColor:
     serializedVersion: 2
     key0: {r: 0.9843138, g: 1, b: 1, a: 1}
-    key1: {r: 0.9843138, g: 1, b: 1, a: 0.8039216}
+    key1: {r: 0.9843138, g: 1, b: 1, a: 0}
     key2: {r: 1, g: 0.1764706, b: 0.25490198, a: 0}
     key3: {r: 1, g: 0.1764706, b: 0.25490198, a: 0}
     key4: {r: 1, g: 0.1764706, b: 0.25490198, a: 0}
@@ -521,7 +632,7 @@ MonoBehaviour:
     ctime6: 0
     ctime7: 0
     atime0: 0
-    atime1: 47224
+    atime1: 65535
     atime2: 65535
     atime3: 65535
     atime4: 65535
@@ -530,8 +641,8 @@ MonoBehaviour:
     atime7: 0
     m_Mode: 0
     m_NumColorKeys: 2
-    m_NumAlphaKeys: 3
-  lifeTime: 1.5
+    m_NumAlphaKeys: 2
+  lifeTime: 0.8
   minDistance: 0.02
   trailIndex: 0
   baseTrans: {fileID: 4718397017338988}
@@ -548,13 +659,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tip: {fileID: 114711822195515948}
-  minSpeed: 50
+  minSpeed: 35
   clips:
   - {fileID: 8300000, guid: 7c039104aaf635a48a25f7d3a6d9db09, type: 3}
   - {fileID: 8300000, guid: 2b69e66737a86e444ac7e96ed42eaeb1, type: 3}
   - {fileID: 8300000, guid: 35089b6dde979714a9ddf077aba52529, type: 3}
   - {fileID: 8300000, guid: 3ffba4709315a114498664424ee913ae, type: 3}
-  volume: 0.2
+  volume: 0.1
   isActive: 1
 --- !u!114 &114359873870715144
 MonoBehaviour:
@@ -569,10 +680,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponTrail: {fileID: 114232382621639742}
   tip: {fileID: 114711822195515948}
-  minSpeed: 50
+  minSpeed: 30
   particles: {fileID: 198955774542311346}
   rateOverDistance: 0
-  activeRateOverDistance: 1000
+  activeRateOverDistance: 200
   clip: {fileID: 0}
   volume: 1
   playPoint: {fileID: 4241282900148078}
@@ -653,7 +764,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1834959870
+  randomSeed: -2096434337
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -1254,7 +1365,7 @@ ParticleSystem:
     rateOverDistance:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 180
+      scalar: 80
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -1305,7 +1416,7 @@ ParticleSystem:
         serializedVersion: 2
         m_Curve:
         - serializedVersion: 2
-          time: 0.76602554
+          time: 0.5021019
           value: 1
           inSlope: 0
           outSlope: 0
@@ -1880,7 +1991,7 @@ ParticleSystem:
     m_Curve:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.7
+      scalar: 0.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -4014,7 +4125,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -2043699347
+  randomSeed: 1405529852
   InitialModule:
     serializedVersion: 3
     enabled: 1

@@ -13,7 +13,7 @@ public class SwordSoundPlayer : MonoBehaviour {
 		if (tip.speed > minSpeed) {
 			if (!isActive) {
 				isActive = true;
-				AudioSource.PlayClipAtPoint(clips[Random.Range(0, clips.Length)], transform.position, volume);
+//				AudioSource.PlayClipAtPoint(clips[Random.Range(0, clips.Length)], transform.position, volume);
 			}
 		} else {
 			isActive = false;

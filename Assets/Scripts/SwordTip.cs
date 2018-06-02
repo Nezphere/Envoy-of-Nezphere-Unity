@@ -1,11 +1,6 @@
 ﻿using UnityEngine;
 
 public class SwordTip : MonoBehaviour {
-	public enum Side {
-		Left,
-		Right,
-	}
-
 	public Side side;
 	public float deltaTime, speed;
 	public Vector3 position, velocity, acceleration;

@@ -57,17 +57,17 @@ public sealed class VrPlayer : MonoBehaviour {
 		//		RHandTrans.localPosition = rHandPosition;
 		//		RHandTrans.localRotation = rHandRotation;
 
-//		var translation = Vector3.zero;
-//		translation.x = Input.GetAxis (WmrInput.WMR_A_L_STICK_X) + Input.GetAxis (WmrInput.WMR_A_R_STICK_X); 
-//		translation.y = Input.GetAxis (WmrInput.WMR_A_L_STICK_Y); 
-//		translation.z = Input.GetAxis (WmrInput.WMR_A_R_STICK_Y);
+		var translation = Vector3.zero;
+		translation.x = Input.GetAxis(WmrInput.WMR_A_L_STICK_X) + Input.GetAxis(WmrInput.WMR_A_R_STICK_X); 
+		translation.y = Input.GetAxis(WmrInput.WMR_A_L_STICK_Y); 
+		translation.z = Input.GetAxis(WmrInput.WMR_A_R_STICK_Y);
 
-//		if (translation.sqrMagnitude != 0) {
-//			transform.Translate (translation * 0.001f);
-//			PlayerPrefs.SetFloat ("player_position_x", transform.position.x);
-//			PlayerPrefs.SetFloat ("player_position_y", transform.position.y);
-//			PlayerPrefs.SetFloat ("player_position_z", transform.position.z);
-//		}
+		if (translation.sqrMagnitude != 0) {
+			transform.Translate(translation * 0.001f);
+			PlayerPrefs.SetFloat("player_position_x", transform.position.x);
+			PlayerPrefs.SetFloat("player_position_y", transform.position.y);
+			PlayerPrefs.SetFloat("player_position_z", transform.position.z);
+		}
 	}
 
 	void OnDrawGizmos() {

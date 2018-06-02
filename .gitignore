@@ -6,6 +6,8 @@
 [Rr]esources/
 Assets/AssetStoreTools*
 
+Assets/LoveLivePractice/Resources
+
 # Visual Studio cache directory
 .vs/
 
