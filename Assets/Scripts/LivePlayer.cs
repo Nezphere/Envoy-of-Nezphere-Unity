@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,11 +36,11 @@ public class LivePlayer : MonoBehaviour {
 		}
 	}
 
-	const double GameStartDelay = 4;
 
 	public AudioSource source;
 
 	[Header("Game")]
+	public float gameStartDelay = 4;
 	public string liveName;
 	public double bufferInterval = 5, cacheInterval = 1;
 	public int level = 1;
@@ -70,26 +71,39 @@ public class LivePlayer : MonoBehaviour {
 		}
 
 		bgm = Resources.Load<AudioClip>("bgms/" + live.bgm_path.Replace(".mp3", ""));
-
-//		startTime = AudioSettings.dspTime + GameStartDelay;
-
 		source.clip = bgm;
-		source.Stop();
-		source.Play();
-		startTime = source.time;
-//		source.PlayScheduled(startTime);
-
-
 		rand = new Random(seed);
+
+		hasStarted = true;
+
+		StartGame();
 	}
 
+	bool hasStarted, isInPrelude;
 	int counter = 0;
+
+	void StartGame() {
+		index = 0;
+		startTime = AudioSettings.dspTime + gameStartDelay;
+		source.PlayScheduled(startTime);
+		isInPrelude = true;
+		index = 0;
+	}
 
 	public static double time;
 
 	void Update() {
-//		time = AudioSettings.dspTime - startTime;
-		time = source.time - startTime;
+		if (hasStarted && !isInPrelude && !source.isPlaying) {
+			StartGame();
+		}
+
+		if (isInPrelude) {
+			time = AudioSettings.dspTime - startTime;
+			isInPrelude = time < 0;
+		} else {
+			time = source.time;
+		}
+
 		double bufferTime = time + bufferInterval;
 
 		while (index < map.lane.Length && map.lane[index].starttime / 1000.0 <= bufferTime) {
@@ -184,7 +198,7 @@ public class LivePlayer : MonoBehaviour {
 	}
 
 	static float HeadingToRotation(Heading heading) {
-		return -45 * ((int)heading - 4);
+		return 45 * ((int)heading - 4);
 	}
 
 	void CreateBlock(Side hand, Heading heading, int lane, double time, ApiMapNote note) {
@@ -193,6 +207,7 @@ public class LivePlayer : MonoBehaviour {
 		block.time = time;
 		block.shouldDie = false;
 //		block.note = note;
+		block.heading = heading;
 
 		var slot = slots[lane];
 		block.x = slot.x * 0.4f;

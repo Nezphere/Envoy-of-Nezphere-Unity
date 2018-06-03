@@ -1,78 +1,49 @@
 fileFormatVersion: 2
 guid: 169982203a05fc349874c29d1e62ef7a
-timeCreated: 1527458831
+timeCreated: 1527987492
 licenseType: Free
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
-    100000: Coating
-    100002: Shell
-    100004: Source
-    100006: //RootNode
-    100008: Coating.L
-    100010: Coating.R
-    100012: Shell.L
-    100014: Shell.R
-    100016: Source.L
-    100018: Source.R
-    400000: Coating
-    400002: Shell
-    400004: Source
-    400006: //RootNode
-    400008: Coating.L
-    400010: Coating.R
-    400012: Shell.L
-    400014: Shell.R
-    400016: Source.L
-    400018: Source.R
-    2100000: Source
-    2100002: Shell
-    2100004: Coating
-    2300000: Coating
-    2300002: Shell
-    2300004: Source
-    2300006: Coating.L
-    2300008: Coating.R
-    2300010: Shell.L
-    2300012: Shell.R
-    2300014: Source.L
-    2300016: Source.R
-    3300000: Coating
-    3300002: Shell
-    3300004: Source
-    3300006: Coating.L
-    3300008: Coating.R
-    3300010: Shell.L
-    3300012: Shell.R
-    3300014: Source.L
-    3300016: Source.R
-    4300000: Source
-    4300002: Shell
-    4300004: Coating
-    4300006: Source.L
-    4300008: Shell.R
-    4300010: Coating.R
-    4300012: Source.R
-    4300014: Shell.L
-    4300016: Coating.L
+    100000: CoreL
+    100002: CoreR
+    100004: ShellL
+    100006: ShellR
+    100008: //RootNode
+    400000: CoreL
+    400002: CoreR
+    400004: ShellL
+    400006: ShellR
+    400008: //RootNode
+    2100000: Shell
+    2100002: Core
+    2100004: No Name
+    2100006: Source
+    2300000: CoreL
+    2300002: CoreR
+    2300004: ShellL
+    2300006: ShellR
+    3300000: CoreL
+    3300002: CoreR
+    3300004: ShellL
+    3300006: ShellR
+    4300000: ShellL
+    4300002: ShellR
+    4300004: CoreL
+    4300006: CoreR
   externalObjects:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Coating
-    second: {fileID: 2100000, guid: d8e71e8598980964daaa9e9cd291bded, type: 2}
+      name: Core
+    second: {fileID: 2100000, guid: 49c2db386a03516458d428c83939bdcb, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Shell
-    second: {fileID: 2100000, guid: 1db594634865bf44181853b313ca13a2, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Source
-    second: {fileID: 2100000, guid: b366dc493f01d0b4cb8210ac34ffd633, type: 2}
+    second: {fileID: 2100000, guid: 44d87117371d63d44af1f4625bf98998, type: 2}
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -100,7 +71,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.15
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importVisibility: 1
@@ -123,7 +94,7 @@ ModelImporter:
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
-    tangentImportMode: 0
+    tangentImportMode: 3
     normalCalculationMode: 4
   importAnimation: 0
   copyAvatar: 0

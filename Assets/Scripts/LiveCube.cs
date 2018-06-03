@@ -16,6 +16,8 @@ public class LiveCube : MonoBehaviour {
 	public double time;
 	public float x, y;
 	public bool shouldDie;
+	// For debug
+	public Heading heading;
 
 	void OnTriggerEnter(Collider other) {
 		if (isDead)
