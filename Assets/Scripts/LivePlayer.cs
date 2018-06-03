@@ -94,6 +94,7 @@ public class LivePlayer : MonoBehaviour {
 
 	void Update() {
 		if (hasStarted && !isInPrelude && !source.isPlaying) {
+			source.pitch *= 1.1f;
 			StartGame();
 		}
 
@@ -122,11 +123,15 @@ public class LivePlayer : MonoBehaviour {
 			counter += 1;
 		}
 			
-		for (int i = 0; i < liveBlocks.Count; i++) {
-			UpdateBlock(liveBlocks[i], time);
-			if (liveBlocks[i].shouldDie) {
-				Destroy(liveBlocks[i].gameObject);
-				liveBlocks.RemoveAt(i);
+		for (int i = 0; i < liveCubes.Count; i++) {
+			var liveCube = liveCubes[i];
+			if (!liveCube.shouldDie) {
+				UpdateBlock(liveCube, time);
+			}
+
+			if (liveCube.shouldDie) {
+				Destroy(liveCube.gameObject);
+				liveCubes.RemoveAt(i);
 				i -= 1;
 			}
 		}
@@ -157,11 +162,25 @@ public class LivePlayer : MonoBehaviour {
 	public float cacheX = 100, cacheY = 100, cacheZ = 100;
 	public EasingType cacheEasingTypeX, cacheEasingTypeY, cacheEasingTypeZ = EasingType.Cubic;
 	public EasingPhase cacheEasingPhaseX, cacheEasingPhaseY, cacheEasingPhaseZ;
+	public AudioClip[] specialClips;
 
 	[Header("Random")]
 	public int seed;
 	public Side leftSide = Side.Left, rightSide = Side.Right;
 	public Heading leftHeading = Heading.Down, rightHeading = Heading.Down;
+	Vector2[] startSlots = {
+		new Vector2(-4f, 4f),
+		new Vector2(-3f, 3f),
+		new Vector2(-2f, 2f),
+		new Vector2(-1f, 1f),
+
+		new Vector2(0f, 0f),
+
+		new Vector2(1f, 1f),
+		new Vector2(2f, 2f),
+		new Vector2(3f, 3f),
+		new Vector2(4f, 4f),
+	};
 	Vector2[] slots = {
 		new Vector2(-3f, 1f),
 		new Vector2(-2f, 1f),
@@ -176,7 +195,7 @@ public class LivePlayer : MonoBehaviour {
 		new Vector2(3f, 1f),
 	};
 
-	readonly List<LiveCube> liveBlocks = new List<LiveCube>();
+	readonly List<LiveCube> liveCubes = new List<LiveCube>();
 
 	static Heading CalcEndHeading(Heading heading) {
 		return (Heading)(((int)heading + 4) % 8);
@@ -208,12 +227,19 @@ public class LivePlayer : MonoBehaviour {
 		block.shouldDie = false;
 //		block.note = note;
 		block.heading = heading;
+		block.startTime = time - bufferInterval;
+		if (note.parallel) {
+			block.clips = specialClips;
+		}
 
 		var slot = slots[lane];
+		var startSlot = startSlots[lane];
+		block.startX = startSlot.x;
+		block.startY = startSlot.y;
 		block.x = slot.x * 0.4f;
 		block.y = slot.y * 0.4f;
 		block.transform.Rotate(HeadingToRotation(heading), 0, 0);
-		liveBlocks.Add(block);
+		liveCubes.Add(block);
 	}
 
 	static bool IsLeft(Heading side) {
@@ -320,23 +346,19 @@ public class LivePlayer : MonoBehaviour {
 	const float damping = 100;
 
 	void UpdateBlock(LiveCube block, double time) {
-		if (block.gameObject.activeSelf) {
-			if (time <= block.time) {  // Not yet
-				var x = Easing.Ease(bufferEasingTypeX, bufferEasingPhaseX, block.x, bufferX * block.x, block.time - time, bufferInterval);
-				var y = Easing.Ease(bufferEasingTypeY, bufferEasingPhaseY, block.y, bufferY, block.time - time, bufferInterval);
-				var z = Easing.Ease(bufferEasingTypeZ, bufferEasingPhaseZ, 0, bufferZ, block.time - time, bufferInterval);
-				block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), Time.deltaTime * damping);
-			} else if (time - block.time < cacheInterval) {  // Over due
-				var x = Easing.Ease(cacheEasingTypeX, cacheEasingPhaseX, block.x, cacheX * block.x, time - block.time, cacheInterval);
-				var y = Easing.Ease(cacheEasingTypeY, cacheEasingPhaseY, block.y, cacheY, time - block.time, cacheInterval);
-				var z = Easing.Ease(cacheEasingTypeZ, cacheEasingPhaseZ, 0, cacheZ, time - block.time, cacheInterval);
-				block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), Time.deltaTime * damping);
-			} else {
-				block.shouldDie = true;
-//				RecordMiss();
-			}
+		if (time <= block.time) {  // Not yet
+			var x = Easing.Ease(bufferEasingTypeX, bufferEasingPhaseX, block.x, bufferX * block.startX, block.time - time, bufferInterval);
+			var y = Easing.Ease(bufferEasingTypeY, bufferEasingPhaseY, block.y, bufferY * block.startY, block.time - time, bufferInterval);
+			var z = Easing.Ease(bufferEasingTypeZ, bufferEasingPhaseZ, 0, bufferZ, block.time - time, bufferInterval);
+			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), Time.deltaTime * damping);
+		} else if (time - block.time < cacheInterval) {  // Over due
+			var x = Easing.Ease(cacheEasingTypeX, cacheEasingPhaseX, block.x, cacheX * block.x, time - block.time, cacheInterval);
+			var y = Easing.Ease(cacheEasingTypeY, cacheEasingPhaseY, block.y, cacheY * block.y, time - block.time, cacheInterval);
+			var z = Easing.Ease(cacheEasingTypeZ, cacheEasingPhaseZ, 0, cacheZ, time - block.time, cacheInterval);
+			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), Time.deltaTime * damping);
 		} else {
 			block.shouldDie = true;
+//				RecordMiss();
 		}
 	}
 
