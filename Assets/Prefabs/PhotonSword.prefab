@@ -661,10 +661,10 @@ MonoBehaviour:
   tip: {fileID: 114711822195515948}
   minSpeed: 35
   clips:
-  - {fileID: 8300000, guid: 7c039104aaf635a48a25f7d3a6d9db09, type: 3}
-  - {fileID: 8300000, guid: 2b69e66737a86e444ac7e96ed42eaeb1, type: 3}
-  - {fileID: 8300000, guid: 35089b6dde979714a9ddf077aba52529, type: 3}
-  - {fileID: 8300000, guid: 3ffba4709315a114498664424ee913ae, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   volume: 0.1
   isActive: 1
 --- !u!114 &114359873870715144
@@ -764,7 +764,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -2096434337
+  randomSeed: 203516738
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -1819,7 +1819,7 @@ ParticleSystem:
     sprites:
     - sprite: {fileID: 0}
   VelocityModule:
-    enabled: 0
+    enabled: 1
     x:
       serializedVersion: 2
       minMaxState: 0
@@ -1905,7 +1905,7 @@ ParticleSystem:
     z:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: -5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -1984,7 +1984,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    inWorldSpace: 0
+    inWorldSpace: 1
   InheritVelocityModule:
     enabled: 1
     m_Mode: 0
@@ -3380,7 +3380,7 @@ ParticleSystem:
     lifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.06
+      scalar: 0.04
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -4125,7 +4125,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1405529852
+  randomSeed: -2033530541
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -5180,7 +5180,7 @@ ParticleSystem:
     sprites:
     - sprite: {fileID: 0}
   VelocityModule:
-    enabled: 0
+    enabled: 1
     x:
       serializedVersion: 2
       minMaxState: 0
@@ -5266,7 +5266,7 @@ ParticleSystem:
     z:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: -5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -5345,7 +5345,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    inWorldSpace: 0
+    inWorldSpace: 1
   InheritVelocityModule:
     enabled: 1
     m_Mode: 0
@@ -7473,7 +7473,7 @@ ParticleSystemRenderer:
   m_NormalDirection: 1
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 0
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00010304
   m_Mesh: {fileID: 0}
   m_Mesh1: {fileID: 0}

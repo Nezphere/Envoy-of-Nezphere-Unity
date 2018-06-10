@@ -42,7 +42,7 @@ public class LivePlayer : MonoBehaviour {
 	[Header("Game")]
 	public float gameStartDelay = 4;
 	public string liveName;
-	public double bufferInterval = 5, cacheInterval = 1;
+	public float bufferInterval = 5, cacheInterval = 1;
 	public int level = 1;
 
 	ApiLive live;
@@ -88,13 +88,15 @@ public class LivePlayer : MonoBehaviour {
 		source.PlayScheduled(startTime);
 		isInPrelude = true;
 		index = 0;
+
+		lastTime = -gameStartDelay;
 	}
 
-	public static double time;
+	public static double time, lastTime, accTime, deltaTime;
 
 	void Update() {
 		if (hasStarted && !isInPrelude && !source.isPlaying) {
-			source.pitch *= 1.1f;
+			source.pitch *= 1f;
 			StartGame();
 		}
 
@@ -104,6 +106,10 @@ public class LivePlayer : MonoBehaviour {
 		} else {
 			time = source.time;
 		}
+
+		deltaTime = time - lastTime;
+		accTime += deltaTime;
+		lastTime = time;
 
 		double bufferTime = time + bufferInterval;
 

@@ -64,21 +64,25 @@ public class LiveCube : MonoBehaviour {
 		float speed = Vector3.Dot(tip.velocity, down);
 
 		if (speed > minDyingSpeed) {  // Die
-			ParticleFxPool.Emit(hitFxPreset, transform.position, transform.rotation);
-
-			AudioSource.PlayClipAtPoint(clips[Random.Range(0, clips.Length)], transform.position, volume * 0.5f * speed / minDyingSpeed);
-
-			foreach (var rigid in GetComponentsInChildren<Rigidbody>()) {
-				rigid.isKinematic = false;
-				rigid.velocity = tip.velocity * velocityScaling;
-				rigid.AddRelativeForce(Random.insideUnitSphere * randomForce, ForceMode.Impulse);
-				rigid.AddTorque(Random.insideUnitSphere * randomTorque, ForceMode.Impulse);
-				rigid.transform.parent = null;
-				Destroy(rigid.gameObject, 1);
-			}
-
-			shouldDie = true;
+			Die(speed, tip.velocity);
 		}
+	}
+
+	public void Die(float speed, Vector3 velocity) {
+		ParticleFxPool.Emit(hitFxPreset, transform.position, transform.rotation);
+
+		AudioSource.PlayClipAtPoint(clips[Random.Range(0, clips.Length)], transform.position, volume * 0.5f * speed / minDyingSpeed);
+
+		foreach (var rigid in GetComponentsInChildren<Rigidbody>()) {
+			rigid.isKinematic = false;
+			rigid.velocity = velocity * velocityScaling;
+			rigid.AddRelativeForce(Random.insideUnitSphere * randomForce, ForceMode.Impulse);
+			rigid.AddTorque(Random.insideUnitSphere * randomTorque, ForceMode.Impulse);
+			rigid.transform.parent = null;
+			Destroy(rigid.gameObject, 3);
+		}
+
+		shouldDie = true;
 	}
 
 	void OnTriggerStay(Collider other) {
