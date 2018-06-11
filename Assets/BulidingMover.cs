@@ -20,11 +20,10 @@ public class BulidingMover : MonoBehaviour {
 
 	void Update() {
 		double time = LivePlayer.accTime;
-		float speed = LivePlayer.Instance.bufferZ / LivePlayer.Instance.bufferInterval;
 
 		transform.Rotate(curRotation * (float)LivePlayer.deltaTime);
 
-		float duration = Mathf.Abs((maxZ - minZ) / speed);
+		float duration = Mathf.Abs((maxZ - minZ) / LivePlayer.speed);
 		if (time < startTime || time - startTime > duration) {
 			transform.localEulerAngles = initRotation + new Vector3(Rand() * initRotationRand.x, Rand() * initRotationRand.y, Rand() * initRotationRand.z);
 			curRotation = rotation + new Vector3(Rand() * rotationRand.x, Rand() * rotationRand.y, Rand() * rotationRand.z);

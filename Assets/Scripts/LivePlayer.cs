@@ -83,6 +83,12 @@ public class LivePlayer : MonoBehaviour {
 	int counter = 0;
 
 	void StartGame() {
+		leftSide = Side.Left;
+		rightSide = Side.Right;
+		leftHeading = Heading.Down;
+		rightHeading = Heading.Down;
+		rand = new Random(seed);
+
 		index = 0;
 		startTime = AudioSettings.dspTime + gameStartDelay;
 		source.PlayScheduled(startTime);
@@ -110,6 +116,8 @@ public class LivePlayer : MonoBehaviour {
 		deltaTime = time - lastTime;
 		accTime += deltaTime;
 		lastTime = time;
+
+		speed = bufferZ / bufferInterval;
 
 		double bufferTime = time + bufferInterval;
 
@@ -169,6 +177,8 @@ public class LivePlayer : MonoBehaviour {
 	public EasingType cacheEasingTypeX, cacheEasingTypeY, cacheEasingTypeZ = EasingType.Cubic;
 	public EasingPhase cacheEasingPhaseX, cacheEasingPhaseY, cacheEasingPhaseZ;
 	public AudioClip[] specialClips;
+
+	public static float speed;
 
 	[Header("Random")]
 	public int seed;

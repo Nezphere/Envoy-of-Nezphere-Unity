@@ -50,7 +50,6 @@ public class CorridorMover : MonoBehaviour {
 	}
 
 	void Update() {
-		float speed = -LivePlayer.Instance.bufferZ / LivePlayer.Instance.bufferInterval;
 		double time = LivePlayer.accTime;
 
 		if (isInTransition) {
@@ -64,7 +63,7 @@ public class CorridorMover : MonoBehaviour {
 				startTime = time;
 			}
 		} else {
-			float duration = configs[selectedIdx].spacing / Mathf.Abs(speed);
+			float duration = Mathf.Abs(configs[selectedIdx].spacing / LivePlayer.speed);
 			
 			if (time < startTime || time - startTime > duration) {
 				startTime = time;
@@ -82,7 +81,7 @@ public class CorridorMover : MonoBehaviour {
 
 						var totalSpacing = configs[selectedIdx].sections * configs[selectedIdx].spacing;
 						configs[nextIdx].trans.localPosition = new Vector3(0, 0, totalSpacing);
-						releaseTime = startTime + totalSpacing / Mathf.Abs(speed);
+						releaseTime = startTime + totalSpacing / Mathf.Abs(LivePlayer.speed);
 
 						isInTransition = true;
 					}
@@ -90,6 +89,6 @@ public class CorridorMover : MonoBehaviour {
 			}
 		}
 
-		configs[selectedIdx].trans.localPosition = new Vector3(0, 0, (float)(time - startTime) * speed);
+		configs[selectedIdx].trans.localPosition = new Vector3(0, 0, -(float)(time - startTime) * LivePlayer.speed);
 	}
 }

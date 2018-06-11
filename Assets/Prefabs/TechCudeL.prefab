@@ -549,7 +549,7 @@ MonoBehaviour:
   randomTorque: 1
   clips:
   - {fileID: 8300000, guid: 106663a9587efac4284e4b1ad8cfaf73, type: 3}
-  volume: 0.4
+  volume: 0.75
   closeFxPreset:
     configs:
     - name: CubeYellowVBig
