@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 23043240151261378}
   - component: {fileID: 65100034892759630}
   - component: {fileID: 54681282251687962}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: ShellL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 23278575080097612}
   - component: {fileID: 65355953492324356}
   - component: {fileID: 54748108732762748}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: ShellR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -79,7 +79,7 @@ GameObject:
   - component: {fileID: 65125718676821576}
   - component: {fileID: 108255728525429782}
   - component: {fileID: 54887500695180758}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: CoreL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 65121923300411078}
   - component: {fileID: 108031608803375356}
   - component: {fileID: 54304964364805976}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: CoreR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -469,8 +469,8 @@ Light:
   serializedVersion: 8
   m_Type: 2
   m_Color: {r: 0, g: 1, b: 0.6689656, a: 1}
-  m_Intensity: 0.2
-  m_Range: 20
+  m_Intensity: 0.1
+  m_Range: 50
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -505,8 +505,8 @@ Light:
   serializedVersion: 8
   m_Type: 2
   m_Color: {r: 0, g: 1, b: 0.6689656, a: 1}
-  m_Intensity: 0.2
-  m_Range: 20
+  m_Intensity: 0.1
+  m_Range: 50
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -549,7 +549,7 @@ MonoBehaviour:
   randomTorque: 1
   clips:
   - {fileID: 8300000, guid: 106663a9587efac4284e4b1ad8cfaf73, type: 3}
-  volume: 0.75
+  volume: 0.6
   closeFxPreset:
     configs:
     - name: CubeYellowVBig
@@ -563,6 +563,8 @@ MonoBehaviour:
     - name: CubeYellowLong
       count: -1
     - name: CubeRed
+      count: -1
+    - name: CubeCoin
       count: -1
   startTime: 0
   closeDuration: 3

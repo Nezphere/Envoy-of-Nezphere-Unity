@@ -40,7 +40,9 @@ public class LivePlayer : MonoBehaviour {
 	public AudioSource source;
 
 	[Header("Game")]
+	public bool isAuto;
 	public float gameStartDelay = 4;
+	public double timeOffset;
 	public string liveName;
 	public float bufferInterval = 5, cacheInterval = 1;
 	public int level = 1;
@@ -113,6 +115,7 @@ public class LivePlayer : MonoBehaviour {
 			time = source.time;
 		}
 
+		time += timeOffset;
 		deltaTime = time - lastTime;
 		accTime += deltaTime;
 		lastTime = time;
@@ -139,6 +142,11 @@ public class LivePlayer : MonoBehaviour {
 			
 		for (int i = 0; i < liveCubes.Count; i++) {
 			var liveCube = liveCubes[i];
+
+			if (isAuto && time >= liveCube.time) {
+				liveCube.Die(liveCube.minDyingSpeed * 1.2f, Vector3.zero);
+			}
+
 			if (!liveCube.shouldDie) {
 				UpdateBlock(liveCube, time);
 			}

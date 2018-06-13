@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4824331157696930}
   - component: {fileID: 33637889217541230}
   - component: {fileID: 23711347454718314}
+  - component: {fileID: 65641079994033792}
   m_Layer: 0
   m_Name: Corridor3
   m_TagString: Untagged
@@ -82,3 +83,15 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1707072354814308}
   m_Mesh: {fileID: 4300000, guid: 5e6cb761587e84c4a81f347b05e94639, type: 3}
+--- !u!65 &65641079994033792
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1707072354814308}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.49499997, y: 0.21, z: 0.1}
+  m_Center: {x: 0.24749999, y: 0, z: -0.05}
