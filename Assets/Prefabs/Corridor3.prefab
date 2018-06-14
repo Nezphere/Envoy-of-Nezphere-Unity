@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33637889217541230}
   - component: {fileID: 23711347454718314}
   - component: {fileID: 65641079994033792}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Corridor3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
