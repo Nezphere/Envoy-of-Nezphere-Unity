@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4241282900148078}
   - component: {fileID: 114241112532497880}
   - component: {fileID: 108066873209005042}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Mid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -38,7 +38,7 @@ GameObject:
   - component: {fileID: 4149830222156960}
   - component: {fileID: 198633053165203094}
   - component: {fileID: 199452428315699682}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: ParticleYellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55,7 +55,7 @@ GameObject:
   - component: {fileID: 4271166139600340}
   - component: {fileID: 114711822195515948}
   - component: {fileID: 108113717220928900}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Tip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ GameObject:
   - component: {fileID: 114232382621639742}
   - component: {fileID: 114359873870715144}
   - component: {fileID: 108679458373580658}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -91,7 +91,7 @@ GameObject:
   - component: {fileID: 4323715764424918}
   - component: {fileID: 33684101744955030}
   - component: {fileID: 23092761419636406}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -106,7 +106,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4220484578331386}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: PhotonSword
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 4499877901700978}
   - component: {fileID: 198955774542311346}
   - component: {fileID: 199397084817190976}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: ParticleRed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,7 +140,7 @@ GameObject:
   - component: {fileID: 4788495081754802}
   - component: {fileID: 33339241426790920}
   - component: {fileID: 23514726997902188}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Attach
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -159,7 +159,7 @@ GameObject:
   - component: {fileID: 23573585133909260}
   - component: {fileID: 65194714515413400}
   - component: {fileID: 54092497466479970}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Beam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -764,7 +764,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 203516738
+  randomSeed: 801396785
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -4125,7 +4125,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -2033530541
+  randomSeed: 396584851
   InitialModule:
     serializedVersion: 3
     enabled: 1

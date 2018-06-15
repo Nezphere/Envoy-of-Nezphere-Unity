@@ -14,22 +14,32 @@ public class ParticleFxPreset {
 }
 
 public class ParticleFxPool : MonoBehaviour {
+	static ParticleFxPool Instance;
+
+	public bool isEnabled = true;
+	public float globalEmissionScaling = 1;
 	public static readonly Dictionary<string, ParticleSystem> particlesByName = new Dictionary<string, ParticleSystem>();
 
 	void Start() {
+		Instance = this;
+
 		foreach (var p in GetComponentsInChildren<ParticleSystem>()) {
 			particlesByName.Add(p.name, p);
 		}
 	}
 
 	public static void Emit(string name, int count, Vector3 position, Quaternion rotation) {
+		if (!Instance.isEnabled) {
+			return;
+		}
+
 		var particle = particlesByName[name];
 		particle.transform.position = position;
 		particle.transform.rotation = rotation;
 		if (count < 0) {
-			particle.Emit((int)particle.emission.GetBurst(0).count.constant);
+			particle.Emit((int)(particle.emission.GetBurst(0).count.constant * Instance.globalEmissionScaling));
 		} else {
-			particle.Emit(count);
+			particle.Emit((int)(count * Instance.globalEmissionScaling));
 		}
 	}
 

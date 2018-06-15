@@ -28,17 +28,17 @@ public class LivePlayer : MonoBehaviour {
 		new Vector2(4f, 4f),
 	};
 	static readonly Vector2[] slots = {
-		new Vector2(-3f, 1f),
+		new Vector2(-2f, 2f),
 		new Vector2(-2f, 1f),
-		new Vector2(-2f, 0f),
+		new Vector2(-1f, 1f),
 		new Vector2(-1f, 0f),
 
 		new Vector2(0f, 0f),
 
 		new Vector2(1f, 0f),
-		new Vector2(2f, 0f),
+		new Vector2(1f, 1f),
 		new Vector2(2f, 1f),
-		new Vector2(3f, 1f),
+		new Vector2(2f, 2f),
 	};
 
 	public static Heading GetEndHeading(Heading heading) {
@@ -47,6 +47,11 @@ public class LivePlayer : MonoBehaviour {
 
 	public static float HeadingToRotation(Heading heading) {
 		return 45 * ((int)heading - 4);
+	}
+
+	public static Vector3 HeadingToVector(Heading Heading) {
+		float rotation = (-HeadingToRotation(Heading) - 90) * Mathf.Deg2Rad;
+		return new Vector3(Mathf.Cos(rotation), Mathf.Sin(rotation));
 	}
 
 
@@ -89,7 +94,7 @@ public class LivePlayer : MonoBehaviour {
 	public string liveName;
 	public int seed, level = 1;
 	public float startDelay = 4, timeOffset = 0.02f;
-	public float bufferInterval = 5, cacheInterval = 1, recycleInterval = 3;
+	public float bufferInterval = 5, cacheInterval = 1, recycleInterval = 3, recycleGraceInterval = 1;
 	public bool shouldAutoPlay;
 
 	[Header("Block")]
@@ -107,6 +112,7 @@ public class LivePlayer : MonoBehaviour {
 	public EasingType closeEasingType;
 	public EasingPhase closeEasingPhase;
 	public ParticleFxPreset closeFxPreset;
+	public FlashFxConfig closeFlashFxConfig;
 
 	[Header("Block Sound")]
 	public float volume;
@@ -127,7 +133,7 @@ public class LivePlayer : MonoBehaviour {
 	int index, counter;
 	bool hasStarted, isInPrelude;
 
-	readonly List<LiveBlock> liveBlockList = new List<LiveBlock>(), deadBlockList = new List<LiveBlock>();
+	readonly LinkedList<LiveBlock> liveBlockList = new LinkedList<LiveBlock>(), deadBlockList = new LinkedList<LiveBlock>(), inactiveBlockList = new LinkedList<LiveBlock>();
 
 
 	void Start() {
@@ -209,23 +215,42 @@ public class LivePlayer : MonoBehaviour {
 		}
 			
 		// Update live blocks
-		for (int i = 0; i < liveBlockList.Count; i++) {
-			var block = liveBlockList[i];
+		var node = liveBlockList.First;
+		while (node != null) {
+			var next = node.Next;
 
+			var block = node.Value;
 			if (shouldAutoPlay && Time >= block.startTime) {
 				block.hitSpeed = block.minDyingSpeed * 1.1f;
+				block.hitVelocity = HeadingToVector(block.heading) * block.hitSpeed;
 				block.shouldDie = true;
 			}
-
+			
 			if (block.shouldDie) {
 				if (!block.shouldDieSilently)
 					KillBlock(block);
-
-				deadBlockList.Add(block);
-				liveBlockList.RemoveAt(i);
-				i -= 1;
+				
+				deadBlockList.AddLast(block);
+				liveBlockList.Remove(node);
 			} else
 				UpdateBlock(block);
+
+			node = next;
+		}
+
+		// Wait dead blocks to be inactive
+		node = deadBlockList.First;
+		while (node != null) {
+			var next = node.Next;
+
+			var deadBlock = node.Value;
+			if (deadBlock.startTime + recycleInterval + recycleGraceInterval < Time) {  // Ready to be revived
+				deadBlock.gameObject.SetActive(false);
+				inactiveBlockList.AddLast(deadBlock);
+				deadBlockList.Remove(node);
+			}
+
+			node = next;
 		}
 	}
 
@@ -323,12 +348,26 @@ public class LivePlayer : MonoBehaviour {
 	void CreateBlock(Side hand, Heading heading, ApiMapNote note) {
 		LiveBlock block = null;
 
-		for (int i = 0; i < deadBlockList.Count; i++) {
-			var deadBlock = deadBlockList[i];
+		var node = deadBlockList.First;
+		while (node != null) {
+			var next = node.Next;
+
+			var deadBlock = node.Value;
 			if (deadBlock.startTime + recycleInterval < Time) {  // Ready to be revived
 				block = deadBlock;
-				deadBlockList.RemoveAt(i);
+				deadBlockList.Remove(node);
 				break;
+			}
+
+			node = next;
+		}
+
+		if (block == null) {
+			node = inactiveBlockList.First;
+			if (node != null) {
+				block = node.Value;
+				block.gameObject.SetActive(true);
+				inactiveBlockList.RemoveFirst();
 			}
 		}
 
@@ -336,7 +375,7 @@ public class LivePlayer : MonoBehaviour {
 			var go = Instantiate(blockPrototype, transform);
 			block = go.GetComponent<LiveBlock>();
 		}
-
+			
 		block.Init(hand);
 		block.heading = heading;
 
@@ -348,11 +387,11 @@ public class LivePlayer : MonoBehaviour {
 		var startSlot = startSlots[note.lane];
 		block.startX = startSlot.x;
 		block.startY = startSlot.y;
-		block.x = slot.x * 0.4f;
-		block.y = slot.y * 0.4f;
+		block.x = slot.x * 0.5f;
+		block.y = slot.y * 0.5f;
 		block.transform.Rotate(HeadingToRotation(heading), 0, 0);
 
-		liveBlockList.Add(block);
+		liveBlockList.AddLast(block);
 	}
 
 	#endregion
@@ -365,6 +404,7 @@ public class LivePlayer : MonoBehaviour {
 			if (closeTime > closeDuration) {
 				block.isClosed = true;
 				ParticleFxPool.Emit(closeFxPreset, block.transform.position, block.transform.rotation);
+				FlashFxPool.Flash(closeFlashFxConfig, block.transform.position);
 
 				block.leftShellTrans.localPosition = Vector3.zero;
 				block.rightShellTrans.localPosition = Vector3.zero;
@@ -396,13 +436,13 @@ public class LivePlayer : MonoBehaviour {
 
 		var clip = missClips[Random.Range(0, missClips.Length)];
 		if (offset <= TimePerfect)
-			clip = block.isParallel ? specialClips[Random.Range(0, specialClips.Length)] : perfectClips[Random.Range(0, missClips.Length)];
+			clip = block.isParallel ? specialClips[Random.Range(0, specialClips.Length)] : perfectClips[Random.Range(0, perfectClips.Length)];
 		else if (offset <= TimeGreat)
-			clip = greatClips[Random.Range(0, missClips.Length)];
+			clip = greatClips[Random.Range(0, greatClips.Length)];
 		else if (offset <= TimeGood)
-			clip = goodClips[Random.Range(0, missClips.Length)];
+			clip = goodClips[Random.Range(0, goodClips.Length)];
 		else if (offset <= TimeBad)
-			clip = badClips[Random.Range(0, missClips.Length)];
+			clip = badClips[Random.Range(0, badClips.Length)];
 
 		block.Die(clip, volume);
 

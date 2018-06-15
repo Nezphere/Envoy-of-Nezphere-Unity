@@ -5,6 +5,7 @@ public class LiveBlock : MonoBehaviour {
 	public AudioSource source;
 	public Transform leftShellTrans, rightShellTrans;
 	public Renderer leftCoreRenderer, rightCoreRenderer;
+	public TransformResetter resetter;
 
 	[Header("Config")]
 	public Side side;
@@ -12,6 +13,7 @@ public class LiveBlock : MonoBehaviour {
 	public float velocityScaling = 1, randomForce = 1, randomTorque = 1;
 	public Material leftMaterial, rightMaterial;
 	public ParticleFxPreset hitFxPreset;
+	public FlashFxConfig hitFlashFxConfig;
 
 	[Header("Close")]
 	public bool isClosed;
@@ -44,17 +46,18 @@ public class LiveBlock : MonoBehaviour {
 		foreach (var rigid in GetComponentsInChildren<Rigidbody>()) {
 			rigid.isKinematic = true;
 			rigid.velocity = Vector3.zero;
-			rigid.transform.localPosition = Vector3.zero;
-			rigid.transform.localRotation = Quaternion.identity;
+			rigid.GetComponent<TransformResetter>().ResetTransform();
 		}
 
 		collier.enabled = true;
+		resetter.ResetTransform();
 	}
 
 	public void Die(AudioClip clip, float volume) {
 		collier.enabled = false;
 
 		ParticleFxPool.Emit(hitFxPreset, transform.position, transform.rotation);
+		FlashFxPool.Flash(hitFlashFxConfig, transform.position);
 		
 		foreach (var rigid in GetComponentsInChildren<Rigidbody>()) {
 			rigid.isKinematic = false;
