@@ -124,6 +124,7 @@ public class LivePlayer : MonoBehaviour {
 	public string perfectText, greatText, goodText, badText;
 	public Tween textTween;
 	public float textEndZ;
+	public FlashFxConfig badFlashFxConfig;
 
 	[Header("Game State")]
 	public int score;
@@ -169,13 +170,13 @@ public class LivePlayer : MonoBehaviour {
 	void StartGame() {
 		// Reset state
 		rand = new System.Random(seed);
-		leftSide = Side.Left;
-		rightSide = Side.Right;
-		leftHeading = Heading.Down;
-		rightHeading = Heading.Down;
+//		leftSide = Side.Left;
+//		rightSide = Side.Right;
+//		leftHeading = Heading.Down;
+//		rightHeading = Heading.Down;
 
 		index = 0;
-		counter = 0;
+//		counter = 0;
 		startTime = AudioSettings.dspTime + startDelay;
 		LastTime = -startDelay;
 
@@ -191,6 +192,7 @@ public class LivePlayer : MonoBehaviour {
 		rightTip.ManualUpdate();
 
 		if (hasStarted && !isInPrelude && !source.isPlaying) {  // Replay
+//			source.pitch *= 1.1f;
 			StartGame();
 		}
 
@@ -393,6 +395,7 @@ public class LivePlayer : MonoBehaviour {
 		block.createTime = Time;
 		block.startTime = note.starttime;
 		block.isParallel = note.parallel;
+		block.isLong = note.longnote;
 
 		var slot = slots[note.lane];
 		var startSlot = startSlots[note.lane];
@@ -401,6 +404,9 @@ public class LivePlayer : MonoBehaviour {
 		block.x = slot.x * 0.5f;
 		block.y = slot.y * 0.5f;
 		block.transform.Rotate(HeadingToRotation(heading), 0, 0);
+
+		block.canvas.rotation = Quaternion.identity;
+//		block.uiDirectionTrans.localEulerAngles = new Vector3(0, 0, -HeadingToRotation(heading));
 
 		liveBlockList.AddLast(block);
 	}
@@ -463,6 +469,9 @@ public class LivePlayer : MonoBehaviour {
 			var z = Easing.Ease(cacheEasingTypeZ, cacheEasingPhaseZ, 0, cacheZ, Time - block.startTime, cacheInterval);
 			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
 		} else {  // Miss
+			AudioFxPool.Play(badAudioConfigs[Random.Range(0, badAudioConfigs.Length)], block.transform.position);
+			FlashFxPool.Flash(badFlashFxConfig, block.transform.position);
+
 			block.shouldDie = true;
 			block.shouldDieSilently = true;
 			ClearCombo();
@@ -518,7 +527,7 @@ public class LivePlayer : MonoBehaviour {
 		string text;
 		if (offset <= TimePerfect) {
 			text = perfectText;
-			audioConfig = block.isParallel ? specialAudioConfigs[Random.Range(0, specialAudioConfigs.Length)] : perfectAudioConfigs[Random.Range(0, perfectAudioConfigs.Length)];
+			audioConfig = block.isLong ? specialAudioConfigs[Random.Range(0, specialAudioConfigs.Length)] : perfectAudioConfigs[Random.Range(0, perfectAudioConfigs.Length)];
 		} else if (offset <= TimeGreat) {
 			text = greatText;
 			audioConfig = greatAudioConfigs[Random.Range(0, greatAudioConfigs.Length)];
@@ -531,14 +540,13 @@ public class LivePlayer : MonoBehaviour {
 		}
 
 		var blockPosition = block.transform.position;
-		hitParticleFxPreset.configs[0].count = score;  // 0th must be CubeCoin
+		hitParticleFxPreset.configs[0].count = combo;  // 0th must be CubeCoin
 		ParticleFxPool.Emit(hitParticleFxPreset, blockPosition, block.transform.rotation);
 		FlashFxPool.Flash(hitFlashFxConfig, blockPosition);
 		AudioFxPool.Play(audioConfig, blockPosition);
 
 		block.Die();
 
-		block.canvas.rotation = Quaternion.identity;
 		block.uiScoreText.text = string.Format("+{0:N0}", inc);
 		block.uiJudgeText.text = text;
 		if (combo > 10)
@@ -546,11 +554,11 @@ public class LivePlayer : MonoBehaviour {
 
 		TweenManager.AddTween(new Tween(recycleInterval, textTween.easingType, textTween.easingPhase, step => {
 			float inverse = 1f - step;
-			float sizeFloat = Mathf.LerpUnclamped(1, 0.5f, step);
-			var size = new Vector3(sizeFloat, sizeFloat, sizeFloat);
-			block.uiScoreText.color = new Color(1, 1, 1, inverse);
-			block.uiJudgeText.color = new Color(1, 1, 1, inverse);
-			block.uiComboText.color = new Color(1, 1, 1, inverse);
+//			float sizeFloat = Mathf.LerpUnclamped(1, 0.5f, step);
+			var size = new Vector3(inverse, inverse, inverse);
+//			block.uiScoreText.color = new Color(1, 1, 1, inverse);
+//			block.uiJudgeText.color = new Color(1, 1, 1, inverse);
+//			block.uiComboText.color = new Color(1, 1, 1, inverse);
 			block.uiScoreText.transform.localScale = size;
 			block.uiJudgeText.transform.localScale = size;
 			block.uiComboText.transform.localScale = size;

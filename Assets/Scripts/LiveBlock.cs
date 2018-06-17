@@ -7,7 +7,7 @@ public class LiveBlock : MonoBehaviour {
 	public Light leftCoreLight, rightCoreLight;
 	public TransformResetter resetter;
 	public Text uiScoreText, uiJudgeText, uiComboText;
-	public Transform canvas;
+	public Transform canvas, uiDirectionTrans;
 
 	[Header("Config")]
 	public Side side;
@@ -20,7 +20,7 @@ public class LiveBlock : MonoBehaviour {
 
 	[Header("Note")]
 	public double startTime;
-	public bool isParallel;
+	public bool isParallel, isLong;
 
 	[Header("Block")]
 	public double createTime;
