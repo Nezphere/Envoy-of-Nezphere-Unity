@@ -5,12 +5,15 @@ using Uif;
 
 [System.Serializable]
 public class Tween {
-	public float duration, time;
+	public float duration;
 	public EasingType easingType;
 	public EasingPhase easingPhase;
 
 	public System.Action<float> applyTransition;
 	public System.Action endTransition;
+
+	[HideInInspector]
+	public float time;
 
 
 	public Tween(float duration, EasingType easingType, EasingPhase easingPhase, System.Action<float> applyTransition, System.Action endTransition = null) {

@@ -1,32 +1,40 @@
 ﻿using UnityEngine;
 
 public class SwordTip : MonoBehaviour {
+	const int CacheCount = 4, CacheMod = 3;
+
+	public Transform baseTrans;
+
 	public Side side;
 	public float deltaTime, speed;
-	public Vector3 position, velocity, acceleration;
-	Vector3 lastPosition, lastVelocity;
+	public Vector3 position, lastPosition, velocity, acceleration;
+	public Vector3 tipPosition, lastTipPosition, basePosition, lastBasePosition;
 
-	const float interval = 0.05f;
+	readonly Vector3[] positions = new Vector3[CacheCount], basePositions = new Vector3[CacheCount];
+	int index;
+
 	float lastTime;
 
-	void LateUpdate() {
+	public void ManualUpdate() {
 		var current = Time.time;
-		//		if (current - lastTime < interval) return;
-		
+
 		deltaTime = current - lastTime;
 		lastTime = current;
-//		deltaTime = Time.deltaTime;
-
-		position = transform.position;
-		velocity = (position - lastPosition) / deltaTime;
-		acceleration = (velocity - lastVelocity) / deltaTime;
 
 		lastPosition = position;
-		lastVelocity = velocity;
+		position = transform.position;
 
+		velocity = (position - lastPosition) / deltaTime;
 		speed = velocity.magnitude;
 
-		Debug.DrawRay(position, velocity * 0.1f, Color.green);
-		//Debug.DrawRay(position, acceleration, Color.red);
+		tipPosition = positions[index & CacheMod] = position;
+		lastTipPosition = positions[(index - CacheMod) & CacheMod];
+
+		basePosition = basePositions[index & CacheMod] = baseTrans.position;
+		lastBasePosition = basePositions[(index - CacheMod) & CacheMod];
+
+		index += 1;
+
+//		Debug.DrawRay(position, velocity * 0.1f, Color.green);
 	}
 }

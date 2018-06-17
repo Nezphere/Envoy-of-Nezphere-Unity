@@ -31,10 +31,10 @@ public class FlashFxPool : MonoBehaviour {
 		if (light == null) {
 			var go = new GameObject("FlashLight", typeof(Light));
 			light = go.GetComponent<Light>();
+			light.transform.parent = Instance.transform;
 			lightList.Add(light);
 		}
 
-		light.transform.parent = Instance.transform;
 		light.transform.position = position;
 
 		light.color = config.color;

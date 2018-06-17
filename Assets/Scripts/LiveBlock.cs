@@ -1,19 +1,19 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class LiveBlock : MonoBehaviour {
-	public Collider collier;
-	public AudioSource source;
 	public Transform leftShellTrans, rightShellTrans;
 	public Renderer leftCoreRenderer, rightCoreRenderer;
+	public Light leftCoreLight, rightCoreLight;
 	public TransformResetter resetter;
+	public Text uiScoreText, uiJudgeText, uiComboText;
+	public Transform canvas;
 
 	[Header("Config")]
 	public Side side;
 	public float minDyingSpeed = 12;
 	public float velocityScaling = 1, randomForce = 1, randomTorque = 1;
 	public Material leftMaterial, rightMaterial;
-	public ParticleFxPreset hitFxPreset;
-	public FlashFxConfig hitFlashFxConfig;
 
 	[Header("Close")]
 	public bool isClosed;
@@ -36,9 +36,18 @@ public class LiveBlock : MonoBehaviour {
 	public void Init(Side side) {
 		this.side = side;
 
+		uiScoreText.text = "";
+		uiJudgeText.text = "";
+		uiComboText.text = "";
+
 		var material = side == Side.Left ? leftMaterial : rightMaterial;
 		leftCoreRenderer.sharedMaterial = material;
 		rightCoreRenderer.sharedMaterial = material;
+
+		var color = material.GetColor("_EmissionColor");
+		leftCoreLight.color = color;
+		rightCoreLight.color = color;
+			
 
 		isClosed = false;
 		shouldDie = shouldDieSilently = false;
@@ -49,47 +58,22 @@ public class LiveBlock : MonoBehaviour {
 			rigid.GetComponent<TransformResetter>().ResetTransform();
 		}
 
-		collier.enabled = true;
 		resetter.ResetTransform();
 	}
 
-	public void Die(AudioClip clip, float volume) {
-		collier.enabled = false;
-
-		ParticleFxPool.Emit(hitFxPreset, transform.position, transform.rotation);
-		FlashFxPool.Flash(hitFlashFxConfig, transform.position);
-		
+	public void Die() {
 		foreach (var rigid in GetComponentsInChildren<Rigidbody>()) {
 			rigid.isKinematic = false;
 			rigid.velocity = hitVelocity * velocityScaling;
 			rigid.AddRelativeForce(Random.insideUnitSphere * randomForce, ForceMode.Impulse);
 			rigid.AddTorque(Random.insideUnitSphere * randomTorque, ForceMode.Impulse);
 		}
-		
-		source.volume = volume * hitSpeed / minDyingSpeed;
-		source.clip = clip;
-		source.Play();
 	}
 
-	void OnTriggerEnter(Collider other) {
-		if (shouldDie)
-			return;
+	public void Collide(SwordTip tip) {
+		shouldDie = true;
 
-		var tip = other.GetComponentInChildren<SwordTip>();
-		if (tip == null || tip.side != side)
-			return;
-
-		if (Vector3.Dot(tip.velocity, -transform.up) > minDyingSpeed) {
-			shouldDie = true;
-
-			hitSpeed = tip.speed;
-			hitVelocity = tip.velocity;
-
-			collier.enabled = false;
-		}
-	}
-
-	void OnTriggerStay(Collider other) {
-		OnTriggerEnter(other);
+		hitSpeed = tip.speed;
+		hitVelocity = tip.velocity;
 	}
 }

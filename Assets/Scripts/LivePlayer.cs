@@ -88,7 +88,9 @@ public class LivePlayer : MonoBehaviour {
 
 	#endregion
 
+	public VrPlayer player;
 	public AudioSource source;
+	public SwordTip leftTip, rightTip;
 
 	[Header("Game Config")]
 	public string liveName;
@@ -105,18 +107,23 @@ public class LivePlayer : MonoBehaviour {
 	public float cacheX = 100, cacheY = 100, cacheZ = 100;
 	public EasingType cacheEasingTypeX, cacheEasingTypeY, cacheEasingTypeZ = EasingType.Cubic;
 	public EasingPhase cacheEasingPhaseX, cacheEasingPhaseY, cacheEasingPhaseZ;
+	public Vector3 blockPoint1, blockPoint2;
 
 	[Header("Block Close")]
 	public float closeDuration;
 	public float shellStart;
 	public EasingType closeEasingType;
 	public EasingPhase closeEasingPhase;
-	public ParticleFxPreset closeFxPreset;
-	public FlashFxConfig closeFlashFxConfig;
 
-	[Header("Block Sound")]
-	public float volume;
-	public AudioClip[] specialClips, perfectClips, greatClips, goodClips, badClips, missClips;
+	[Header("Block Fx")]
+	public ParticleFxPreset closeParticleFxPreset;
+	public FlashFxConfig closeFlashFxConfig;
+	public ParticleFxPreset hitParticleFxPreset;
+	public FlashFxConfig hitFlashFxConfig;
+	public AudioFxConfig[] specialAudioConfigs, perfectAudioConfigs, greatAudioConfigs, goodAudioConfigs, badAudioConfigs;
+	public string perfectText, greatText, goodText, badText;
+	public Tween textTween;
+	public float textEndZ;
 
 	[Header("Game State")]
 	public int score;
@@ -179,6 +186,10 @@ public class LivePlayer : MonoBehaviour {
 	}
 
 	void Update() {
+		player.ManualUpdate();
+		leftTip.ManualUpdate();
+		rightTip.ManualUpdate();
+
 		if (hasStarted && !isInPrelude && !source.isPlaying) {  // Replay
 			StartGame();
 		}
@@ -396,6 +407,33 @@ public class LivePlayer : MonoBehaviour {
 
 	#endregion
 
+	static bool RayIntersectsTriangle(Vector3 orig, Vector3 dir, Vector3 vert0, Vector3 vert1, Vector3 vert2, out float t) {
+		const float EPSILON = 0.0001f; 
+		t = 0;
+
+		var edge1 = vert1 - vert0;
+		var edge2 = vert2 - vert0;
+
+		var pvec = Vector3.Cross(dir, edge2);
+		float det = Vector3.Dot(edge1, pvec);
+		if (-EPSILON < det && det < EPSILON)
+			return false;
+		
+		float inv_det = 1f / det;
+		var tvec = orig - vert0;
+		float u = Vector3.Dot(tvec, pvec) * inv_det;
+		if (u < 0 || u > 1)
+			return false;
+
+		var qvec = Vector3.Cross(tvec, edge1);
+		float v = Vector3.Dot(dir, qvec) * inv_det;
+		if (v < 0 || u + v > 1)
+			return false;
+
+		t = Vector3.Dot(edge2, qvec) * inv_det;
+		return true;
+	}
+
 	void UpdateBlock(LiveBlock block) {
 		const float damping = 100;
 
@@ -403,7 +441,7 @@ public class LivePlayer : MonoBehaviour {
 			double closeTime = LivePlayer.Time - block.createTime;
 			if (closeTime > closeDuration) {
 				block.isClosed = true;
-				ParticleFxPool.Emit(closeFxPreset, block.transform.position, block.transform.rotation);
+				ParticleFxPool.Emit(closeParticleFxPreset, block.transform.position, block.transform.rotation);
 				FlashFxPool.Flash(closeFlashFxConfig, block.transform.position);
 
 				block.leftShellTrans.localPosition = Vector3.zero;
@@ -429,34 +467,94 @@ public class LivePlayer : MonoBehaviour {
 			block.shouldDieSilently = true;
 			ClearCombo();
 		}
+
+		if (block.isClosed && Time - block.startTime < cacheInterval) {  // Detect collision
+			if (block.side == Side.Left) {  // Left hand
+				if (Vector3.Dot(leftTip.velocity, -block.transform.up) > block.minDyingSpeed)
+					DetectCollision(leftTip, block);
+			} else {  // Right hand
+				if (Vector3.Dot(rightTip.velocity, -block.transform.up) > block.minDyingSpeed)
+					DetectCollision(rightTip, block);
+			}
+		}
+	}
+
+	/**
+	 * tip  - lastTip
+	 *  |   \     |
+	 * base - lastBase
+	 */
+	void DetectCollision(SwordTip tip, LiveBlock block) {
+		Vector3 tipPosition = tip.tipPosition, lastTipPosition = tip.lastTipPosition, basePosition = tip.basePosition, lastBasePosition = tip.lastBasePosition;
+//		Debug.DrawLine(tipPosition, lastTipPosition, Color.magenta);
+//		Debug.DrawLine(tipPosition, lastBasePosition, Color.magenta);
+//		Debug.DrawLine(tipPosition, basePosition, Color.magenta);
+//		Debug.DrawLine(lastBasePosition, lastTipPosition, Color.magenta);
+//		Debug.DrawLine(lastBasePosition, basePosition, Color.magenta);
+
+		float t;
+		Vector3 blockTopLeft = block.transform.TransformPoint(blockPoint1), blockTipRight = block.transform.TransformPoint(blockPoint2);
+		Debug.DrawLine(blockTopLeft, blockTipRight, Color.cyan);
+
+		if (RayIntersectsTriangle(blockTopLeft, blockTipRight - blockTopLeft, tipPosition, lastTipPosition, lastBasePosition, out t) && 0 <= t && t <= 1)
+			block.Collide(tip);
+		else if (RayIntersectsTriangle(blockTopLeft, blockTipRight - blockTopLeft, tipPosition, lastBasePosition, basePosition, out t) && 0 <= t && t <= 1)
+			block.Collide(tip);
 	}
 
 	void KillBlock(LiveBlock block) {
 		double offset = Math.Abs(block.startTime - LivePlayer.Time);
 
-		var clip = missClips[Random.Range(0, missClips.Length)];
-		if (offset <= TimePerfect)
-			clip = block.isParallel ? specialClips[Random.Range(0, specialClips.Length)] : perfectClips[Random.Range(0, perfectClips.Length)];
-		else if (offset <= TimeGreat)
-			clip = greatClips[Random.Range(0, greatClips.Length)];
-		else if (offset <= TimeGood)
-			clip = goodClips[Random.Range(0, goodClips.Length)];
-		else if (offset <= TimeBad)
-			clip = badClips[Random.Range(0, badClips.Length)];
-
-		block.Die(clip, volume);
-
 		if (offset <= TimeGood)
 			AddCombo();
 		else
 			ClearCombo();
-		
-		if (offset > TimeBad)  // No score for you!
-			return;
 
 		float inc = block.isParallel ? BaseParaScore : BaseNormalScore;
 		inc *= GetScoreOffsetAddon(offset) * GetScoreComboAddon(combo);
-		AddScore((int)inc);
+		score += (int)inc;
+
+		AudioFxConfig audioConfig;
+		string text;
+		if (offset <= TimePerfect) {
+			text = perfectText;
+			audioConfig = block.isParallel ? specialAudioConfigs[Random.Range(0, specialAudioConfigs.Length)] : perfectAudioConfigs[Random.Range(0, perfectAudioConfigs.Length)];
+		} else if (offset <= TimeGreat) {
+			text = greatText;
+			audioConfig = greatAudioConfigs[Random.Range(0, greatAudioConfigs.Length)];
+		} else if (offset <= TimeGood) {
+			text = goodText;
+			audioConfig = goodAudioConfigs[Random.Range(0, goodAudioConfigs.Length)];
+		} else {  // if (offset <= TimeBad)
+			text = badText;
+			audioConfig = badAudioConfigs[Random.Range(0, badAudioConfigs.Length)];
+		}
+
+		var blockPosition = block.transform.position;
+		hitParticleFxPreset.configs[0].count = score;  // 0th must be CubeCoin
+		ParticleFxPool.Emit(hitParticleFxPreset, blockPosition, block.transform.rotation);
+		FlashFxPool.Flash(hitFlashFxConfig, blockPosition);
+		AudioFxPool.Play(audioConfig, blockPosition);
+
+		block.Die();
+
+		block.canvas.rotation = Quaternion.identity;
+		block.uiScoreText.text = string.Format("+{0:N0}", inc);
+		block.uiJudgeText.text = text;
+		if (combo > 10)
+			block.uiComboText.text = string.Format("{0:N0}", combo);
+
+		TweenManager.AddTween(new Tween(recycleInterval, textTween.easingType, textTween.easingPhase, step => {
+			float inverse = 1f - step;
+			float sizeFloat = Mathf.LerpUnclamped(1, 0.5f, step);
+			var size = new Vector3(sizeFloat, sizeFloat, sizeFloat);
+			block.uiScoreText.color = new Color(1, 1, 1, inverse);
+			block.uiJudgeText.color = new Color(1, 1, 1, inverse);
+			block.uiComboText.color = new Color(1, 1, 1, inverse);
+			block.uiScoreText.transform.localScale = size;
+			block.uiJudgeText.transform.localScale = size;
+			block.uiComboText.transform.localScale = size;
+		}));
 	}
 
 	void AddCombo() {

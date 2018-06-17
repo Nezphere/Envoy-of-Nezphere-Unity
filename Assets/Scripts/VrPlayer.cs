@@ -37,16 +37,9 @@ public sealed class VrPlayer : MonoBehaviour {
 		transform.position = position;
 	}
 
-	void Update() {
-		//		var headPosition = InputTracking.GetLocalPosition(XRNode.CenterEye);
-		//		var headRotation = InputTracking.GetLocalRotation(XRNode.CenterEye);
-		//		HeadTrans.localPosition = headPosition;
-		//		HeadTrans.localRotation = headRotation;
-
+	public void ManualUpdate() {
 		var lHandPosition = InputTracking.GetLocalPosition(XRNode.LeftHand);
 		var lHandRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
-		//		LHandTrans.localPosition = lHandPosition;
-		//		LHandTrans.localRotation = lHandRotation;
 		lHandTrans.localPosition = Vector3.Lerp(lHandTrans.localPosition, lHandPosition, Time.deltaTime * damping);
 		lHandTrans.localRotation = Quaternion.Slerp(lHandTrans.localRotation, lHandRotation, Time.deltaTime * rotationDamping);
 
@@ -54,8 +47,6 @@ public sealed class VrPlayer : MonoBehaviour {
 		var rHandRotation = InputTracking.GetLocalRotation(XRNode.RightHand);
 		rHandTrans.localPosition = Vector3.Lerp(rHandTrans.localPosition, rHandPosition, Time.deltaTime * damping);
 		rHandTrans.localRotation = Quaternion.Slerp(rHandTrans.localRotation, rHandRotation, Time.deltaTime * rotationDamping);
-		//		RHandTrans.localPosition = rHandPosition;
-		//		RHandTrans.localRotation = rHandRotation;
 
 		var translation = Vector3.zero;
 		translation.x = Input.GetAxis(WmrInput.WMR_A_L_STICK_X) + Input.GetAxis(WmrInput.WMR_A_R_STICK_X); 
@@ -70,20 +61,19 @@ public sealed class VrPlayer : MonoBehaviour {
 		}
 	}
 
-	void OnDrawGizmos() {
-		//		var headPosition = InputTracking.GetLocalPosition (XRNode.CenterEye);
-		//		var headRotation = InputTracking.GetLocalRotation (XRNode.CenterEye);
-		//		DrawAnchor (headPosition, headRotation);
-
-		var lHandPosition = InputTracking.GetLocalPosition(XRNode.LeftHand);
-		var lHandRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
-		//		DrawAnchor(lHandPosition, lHandRotation, Input.GetAxis(WmrInput.WMR_A_L_GRIP));
-		DrawAnchor(lHandPosition, lHandRotation);
-
-		var rHandPosition = InputTracking.GetLocalPosition(XRNode.RightHand);
-		var rHandRotation = InputTracking.GetLocalRotation(XRNode.RightHand);
-		DrawAnchor(rHandPosition, rHandRotation);
-	}
+	//	void OnDrawGizmos() {
+	//		var headPosition = InputTracking.GetLocalPosition(XRNode.CenterEye);
+	//		var headRotation = InputTracking.GetLocalRotation(XRNode.CenterEye);
+	//		DrawAnchor(headPosition, headRotation);
+	//
+	//		var lHandPosition = InputTracking.GetLocalPosition(XRNode.LeftHand);
+	//		var lHandRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
+	//		DrawAnchor(lHandPosition, lHandRotation);
+	//
+	//		var rHandPosition = InputTracking.GetLocalPosition(XRNode.RightHand);
+	//		var rHandRotation = InputTracking.GetLocalRotation(XRNode.RightHand);
+	//		DrawAnchor(rHandPosition, rHandRotation);
+	//	}
 
 	static void DrawAnchor(Vector3 position, Quaternion rotation, float length = 0.5f) {
 		Gizmos.color = Color.green;

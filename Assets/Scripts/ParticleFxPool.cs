@@ -36,6 +36,7 @@ public class ParticleFxPool : MonoBehaviour {
 		var particle = particlesByName[name];
 		particle.transform.position = position;
 		particle.transform.rotation = rotation;
+
 		if (count < 0) {
 			particle.Emit((int)(particle.emission.GetBurst(0).count.constant * Instance.globalEmissionScaling));
 		} else {
