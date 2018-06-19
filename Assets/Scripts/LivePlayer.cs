@@ -191,6 +191,9 @@ public class LivePlayer : MonoBehaviour {
 		leftTip.ManualUpdate();
 		rightTip.ManualUpdate();
 
+		if (!hasStarted)
+			return;
+
 		if (hasStarted && !isInPrelude && !source.isPlaying) {  // Replay
 //			source.pitch *= 1.1f;
 			StartGame();
@@ -413,7 +416,7 @@ public class LivePlayer : MonoBehaviour {
 
 	#endregion
 
-	static bool RayIntersectsTriangle(Vector3 orig, Vector3 dir, Vector3 vert0, Vector3 vert1, Vector3 vert2, out float t) {
+	public static bool RayTriangleIntersection(Vector3 orig, Vector3 dir, Vector3 vert0, Vector3 vert1, Vector3 vert2, out float t) {
 		const float EPSILON = 0.0001f; 
 		t = 0;
 
@@ -438,6 +441,15 @@ public class LivePlayer : MonoBehaviour {
 
 		t = Vector3.Dot(edge2, qvec) * inv_det;
 		return true;
+	}
+
+	/**
+	 * vert0 - vert1
+	 *   |   \   |
+	 * vert3 - vert2
+	 */
+	public static bool RayQuadIntersection(Vector3 orig, Vector3 dir, Vector3 vert0, Vector3 vert1, Vector3 vert2, Vector3 vert3, out float t) {
+		return RayTriangleIntersection(orig, dir, vert0, vert1, vert2, out t) || RayTriangleIntersection(orig, dir, vert0, vert2, vert3, out t);
 	}
 
 	void UpdateBlock(LiveBlock block) {
@@ -505,9 +517,7 @@ public class LivePlayer : MonoBehaviour {
 		Vector3 blockTopLeft = block.transform.TransformPoint(blockPoint1), blockTipRight = block.transform.TransformPoint(blockPoint2);
 		Debug.DrawLine(blockTopLeft, blockTipRight, Color.cyan);
 
-		if (RayIntersectsTriangle(blockTopLeft, blockTipRight - blockTopLeft, tipPosition, lastTipPosition, lastBasePosition, out t) && 0 <= t && t <= 1)
-			block.Collide(tip);
-		else if (RayIntersectsTriangle(blockTopLeft, blockTipRight - blockTopLeft, tipPosition, lastBasePosition, basePosition, out t) && 0 <= t && t <= 1)
+		if (RayQuadIntersection(blockTopLeft, blockTipRight - blockTopLeft, tipPosition, lastTipPosition, lastBasePosition, basePosition, out t) && 0 <= t && t <= 1)
 			block.Collide(tip);
 	}
 
