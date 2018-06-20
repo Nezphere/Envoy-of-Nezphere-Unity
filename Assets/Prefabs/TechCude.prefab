@@ -827,10 +827,10 @@ MonoBehaviour:
   canvas: {fileID: 224811571560219642}
   uiDirectionTrans: {fileID: 224167303900162136}
   side: 0
-  minDyingSpeed: 10
-  velocityScaling: 0.2
-  randomForce: 6
-  randomTorque: 2
+  minDyingSpeed: 30
+  velocityScaling: 0.1
+  randomForce: 0.2
+  randomTorque: 0.1
   leftMaterial: {fileID: 2100000, guid: 10931d00baa143e45841a7e4cc00fd64, type: 2}
   rightMaterial: {fileID: 2100000, guid: 3e9c36d28f924b5499da496cb1d223f5, type: 2}
   isClosed: 0

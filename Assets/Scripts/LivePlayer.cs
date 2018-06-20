@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
 
 using Uif;
 using LoveLivePractice.Api;
@@ -56,7 +57,7 @@ public class LivePlayer : MonoBehaviour {
 
 
 	public const float BaseNormalScore = 100, BaseParaScore = 125;
-	public const float TimePerfect = 0.08f, TimeGreat = 0.24f, TimeGood = 0.32f, TimeBad = 0.8f;
+	public const float TimePerfect = 0.05f, TimeGreat = 0.15f, TimeGood = 0.2f, TimeBad = 0.5f;
 
 	public static float GetScoreOffsetAddon(double offset) {
 		if (offset <= TimePerfect)
@@ -91,6 +92,7 @@ public class LivePlayer : MonoBehaviour {
 	public VrPlayer player;
 	public AudioSource source;
 	public SwordTip leftTip, rightTip;
+	public Text uiComboText;
 
 	[Header("Game Config")]
 	public string liveName;
@@ -125,6 +127,7 @@ public class LivePlayer : MonoBehaviour {
 	public Tween textTween;
 	public float textEndZ;
 	public FlashFxConfig badFlashFxConfig;
+	public Material perfectMaterial, greatMaterial, goodMaterial, badMaterial;
 
 	[Header("Game State")]
 	public int score;
@@ -170,13 +173,13 @@ public class LivePlayer : MonoBehaviour {
 	void StartGame() {
 		// Reset state
 		rand = new System.Random(seed);
-//		leftSide = Side.Left;
-//		rightSide = Side.Right;
-//		leftHeading = Heading.Down;
-//		rightHeading = Heading.Down;
+		leftSide = Side.Left;
+		rightSide = Side.Right;
+		leftHeading = Heading.Down;
+		rightHeading = Heading.Down;
 
 		index = 0;
-//		counter = 0;
+		counter = 0;
 		startTime = AudioSettings.dspTime + startDelay;
 		LastTime = -startDelay;
 
@@ -487,6 +490,8 @@ public class LivePlayer : MonoBehaviour {
 			block.shouldDie = true;
 			block.shouldDieSilently = true;
 			ClearCombo();
+			uiComboText.material = badMaterial;
+			uiComboText.text = string.Format("{0:N0}\nx {1:N0} x", score, combo);
 		}
 
 		if (block.isClosed && Time - block.startTime < cacheInterval) {  // Detect collision
@@ -534,28 +539,44 @@ public class LivePlayer : MonoBehaviour {
 		score += (int)inc;
 
 		AudioFxConfig audioConfig;
+		Material material;
 		string text;
+		float scale;
 		if (offset <= TimePerfect) {
+			scale = 2;
+			material = perfectMaterial;
 			text = perfectText;
 			audioConfig = block.isLong ? specialAudioConfigs[Random.Range(0, specialAudioConfigs.Length)] : perfectAudioConfigs[Random.Range(0, perfectAudioConfigs.Length)];
 		} else if (offset <= TimeGreat) {
+			scale = 1.5f;
+			material = greatMaterial;
 			text = greatText;
 			audioConfig = greatAudioConfigs[Random.Range(0, greatAudioConfigs.Length)];
 		} else if (offset <= TimeGood) {
+			scale = 1;
+			material = goodMaterial;
 			text = goodText;
 			audioConfig = goodAudioConfigs[Random.Range(0, goodAudioConfigs.Length)];
 		} else {  // if (offset <= TimeBad)
+			scale = 0.5f;
+			material = badMaterial;
 			text = badText;
 			audioConfig = badAudioConfigs[Random.Range(0, badAudioConfigs.Length)];
 		}
 
 		var blockPosition = block.transform.position;
-		hitParticleFxPreset.configs[0].count = combo;  // 0th must be CubeCoin
+		hitParticleFxPreset.configs[0].count = combo << 1;  // 0th must be CubeCoin
 		ParticleFxPool.Emit(hitParticleFxPreset, blockPosition, block.transform.rotation);
 		FlashFxPool.Flash(hitFlashFxConfig, blockPosition);
 		AudioFxPool.Play(audioConfig, blockPosition);
 
 		block.Die();
+
+		block.uiComboText.material = material;
+		block.uiJudgeText.material = material;
+		block.uiScoreText.material = material;
+		uiComboText.material = material;
+		uiComboText.text = string.Format(combo == 0 ? "{0:N0}\nx {1:N0} x" : "{0:N0}\n+ {1:N0} +", score, combo);
 
 		block.uiScoreText.text = string.Format("+{0:N0}", inc);
 		block.uiJudgeText.text = text;
@@ -563,8 +584,7 @@ public class LivePlayer : MonoBehaviour {
 			block.uiComboText.text = string.Format("{0:N0}", combo);
 
 		TweenManager.AddTween(new Tween(recycleInterval, textTween.easingType, textTween.easingPhase, step => {
-			float inverse = 1f - step;
-//			float sizeFloat = Mathf.LerpUnclamped(1, 0.5f, step);
+			float inverse = (1f - step);// * scale;
 			var size = new Vector3(inverse, inverse, inverse);
 //			block.uiScoreText.color = new Color(1, 1, 1, inverse);
 //			block.uiJudgeText.color = new Color(1, 1, 1, inverse);
