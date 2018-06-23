@@ -72,17 +72,17 @@ public class LivePlayer : MonoBehaviour {
 	}
 
 	public static float GetScoreComboAddon(int combo) {
-		if (combo <= 50)
+		if (combo <= 25)
 			return 1.0f;
-		if (combo <= 100)
+		if (combo <= 50)
 			return 1.1f;
-		if (combo <= 200)
+		if (combo <= 100)
 			return 1.15f;
-		if (combo <= 400)
+		if (combo <= 200)
 			return 1.2f;
-		if (combo <= 600)
+		if (combo <= 300)
 			return 1.25f;
-		if (combo <= 800)
+		if (combo <= 400)
 			return 1.3f;
 		return 1.35f;
 	}
@@ -92,7 +92,10 @@ public class LivePlayer : MonoBehaviour {
 	public VrPlayer player;
 	public AudioSource source;
 	public SwordTip leftTip, rightTip;
-	public Text uiComboText;
+
+	[Header("Score")]
+	public Text uiScoreText, uiComboText, uiIncText;
+	public Tween uiScoreTextTween, uiComboTextTween, uiIncTextTween;
 
 	[Header("Game Config")]
 	public string liveName;
@@ -146,9 +149,31 @@ public class LivePlayer : MonoBehaviour {
 
 	readonly LinkedList<LiveBlock> liveBlockList = new LinkedList<LiveBlock>(), deadBlockList = new LinkedList<LiveBlock>(), inactiveBlockList = new LinkedList<LiveBlock>();
 
-
 	void Start() {
 		Instance = this;
+
+		uiScoreTextTween.isDead = true;
+		uiScoreTextTween.doStayAlive = true;
+		uiScoreTextTween.SetTransition(step => {
+			float size = 1.5f + (1f - step) * 1f;
+			uiScoreText.transform.localScale = new Vector3(size, size, size);
+		});
+		TweenManager.AddTween(uiScoreTextTween, false);
+		uiComboTextTween.isDead = true;
+		uiComboTextTween.doStayAlive = true;
+		uiComboTextTween.SetTransition(step => {
+			float size = 1f + (1f - step) * 0.2f;
+			uiComboText.transform.localScale = new Vector3(size, size, size);
+		});
+		TweenManager.AddTween(uiComboTextTween, false);
+		uiIncTextTween.isDead = true;
+		uiIncTextTween.doStayAlive = true;
+		uiIncTextTween.SetTransition(step => {
+//			float size = 1.5f + (1f - step) * 0.2f;
+			float size = (1f - step) * 1.5f;
+			uiIncText.transform.localScale = new Vector3(size, size, size);
+		});
+		TweenManager.AddTween(uiIncTextTween, false);
 
 		using (var liveAsset = new FResource<TextAsset>("lives/" + liveName)) {
 			live = JsonUtility.FromJson<ApiLiveResponse>(liveAsset.asset.text).content;
@@ -239,7 +264,7 @@ public class LivePlayer : MonoBehaviour {
 			var next = node.Next;
 
 			var block = node.Value;
-			if (shouldAutoPlay && Time >= block.startTime) {
+			if (shouldAutoPlay && (Math.Abs(Time - block.startTime) < TimePerfect || Time > block.startTime)) {
 				block.hitSpeed = block.minDyingSpeed * 1.1f;
 				block.hitVelocity = HeadingToVector(block.heading) * block.hitSpeed;
 				block.shouldDie = true;
@@ -456,7 +481,7 @@ public class LivePlayer : MonoBehaviour {
 	}
 
 	void UpdateBlock(LiveBlock block) {
-		const float damping = 100;
+//		const float damping = 100;
 
 		if (!block.isClosed) {
 			double closeTime = LivePlayer.Time - block.createTime;
@@ -477,21 +502,28 @@ public class LivePlayer : MonoBehaviour {
 			var x = Easing.Ease(bufferEasingTypeX, bufferEasingPhaseX, block.x, bufferX * block.startX, block.startTime - Time, bufferInterval);
 			var y = Easing.Ease(bufferEasingTypeY, bufferEasingPhaseY, block.y, bufferY * block.startY, block.startTime - Time, bufferInterval);
 			var z = Easing.Ease(bufferEasingTypeZ, bufferEasingPhaseZ, 0, bufferZ, block.startTime - Time, bufferInterval);
-			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
-		} else if (Time - block.startTime < cacheInterval) {  // Over due
+//			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
+			block.transform.localPosition = new Vector3(x, y, z);
+		} else if (Time - block.startTime < cacheInterval && Time - block.startTime < TimeBad) {  // Over due
 			var x = Easing.Ease(cacheEasingTypeX, cacheEasingPhaseX, block.x, cacheX * block.x, Time - block.startTime, cacheInterval);
 			var y = Easing.Ease(cacheEasingTypeY, cacheEasingPhaseY, block.y, cacheY * block.y, Time - block.startTime, cacheInterval);
 			var z = Easing.Ease(cacheEasingTypeZ, cacheEasingPhaseZ, 0, cacheZ, Time - block.startTime, cacheInterval);
-			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
+//			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
+			block.transform.localPosition = new Vector3(x, y, z);
 		} else {  // Miss
 			AudioFxPool.Play(badAudioConfigs[Random.Range(0, badAudioConfigs.Length)], block.transform.position);
 			FlashFxPool.Flash(badFlashFxConfig, block.transform.position);
 
+			uiScoreText.material = badMaterial;
+			uiComboText.material = badMaterial;
+			uiIncText.text = "";
+			uiComboText.text = "x 0 x";
+			uiComboTextTween.isDead = false;
+			uiComboTextTween.time = 0;
+
 			block.shouldDie = true;
 			block.shouldDieSilently = true;
-			ClearCombo();
-			uiComboText.material = badMaterial;
-			uiComboText.text = string.Format("{0:N0}\nx {1:N0} x", score, combo);
+			combo = 0;
 		}
 
 		if (block.isClosed && Time - block.startTime < cacheInterval) {  // Detect collision
@@ -529,10 +561,13 @@ public class LivePlayer : MonoBehaviour {
 	void KillBlock(LiveBlock block) {
 		double offset = Math.Abs(block.startTime - LivePlayer.Time);
 
-		if (offset <= TimeGood)
-			AddCombo();
-		else
-			ClearCombo();
+		if (offset <= TimeGood) {
+			combo += 1;
+			if (combo > maxCombo)
+				maxCombo = combo;
+		} else {
+			combo = 0;
+		}
 
 		float inc = block.isParallel ? BaseParaScore : BaseNormalScore;
 		inc *= GetScoreOffsetAddon(offset) * GetScoreComboAddon(combo);
@@ -541,24 +576,24 @@ public class LivePlayer : MonoBehaviour {
 		AudioFxConfig audioConfig;
 		Material material;
 		string text;
-		float scale;
+//		float scale;
 		if (offset <= TimePerfect) {
-			scale = 2;
+//			scale = 2;
 			material = perfectMaterial;
 			text = perfectText;
 			audioConfig = block.isLong ? specialAudioConfigs[Random.Range(0, specialAudioConfigs.Length)] : perfectAudioConfigs[Random.Range(0, perfectAudioConfigs.Length)];
 		} else if (offset <= TimeGreat) {
-			scale = 1.5f;
+//			scale = 1.5f;
 			material = greatMaterial;
 			text = greatText;
 			audioConfig = greatAudioConfigs[Random.Range(0, greatAudioConfigs.Length)];
 		} else if (offset <= TimeGood) {
-			scale = 1;
+//			scale = 1;
 			material = goodMaterial;
 			text = goodText;
 			audioConfig = goodAudioConfigs[Random.Range(0, goodAudioConfigs.Length)];
 		} else {  // if (offset <= TimeBad)
-			scale = 0.5f;
+//			scale = 0.5f;
 			material = badMaterial;
 			text = badText;
 			audioConfig = badAudioConfigs[Random.Range(0, badAudioConfigs.Length)];
@@ -570,13 +605,24 @@ public class LivePlayer : MonoBehaviour {
 		FlashFxPool.Flash(hitFlashFxConfig, blockPosition);
 		AudioFxPool.Play(audioConfig, blockPosition);
 
+		uiScoreText.material = material;
+		uiIncText.material = material;
+		uiComboText.material = material;
+		uiScoreText.text = score.ToString("N0");
+		uiIncText.text = "+" + inc.ToString("N0");
+		uiComboText.text = string.Format(combo == 0 ? "x {0:N0} x" : combo == maxCombo ? "^ {0:N0} ^" : "+ {0:N0} +", combo);
+		uiScoreTextTween.isDead = false;
+		uiScoreTextTween.time = 0;
+		uiComboTextTween.isDead = false;
+		uiComboTextTween.time = 0;
+		uiIncTextTween.isDead = false;
+		uiIncTextTween.time = 0;
+
 		block.Die();
 
 		block.uiComboText.material = material;
 		block.uiJudgeText.material = material;
 		block.uiScoreText.material = material;
-		uiComboText.material = material;
-		uiComboText.text = string.Format(combo == 0 ? "{0:N0}\nx {1:N0} x" : "{0:N0}\n+ {1:N0} +", score, combo);
 
 		block.uiScoreText.text = string.Format("+{0:N0}", inc);
 		block.uiJudgeText.text = text;
@@ -593,19 +639,5 @@ public class LivePlayer : MonoBehaviour {
 			block.uiJudgeText.transform.localScale = size;
 			block.uiComboText.transform.localScale = size;
 		}));
-	}
-
-	void AddCombo() {
-		combo += 1;
-		if (combo > maxCombo)
-			maxCombo = combo;
-	}
-
-	void ClearCombo() {
-		combo = 0;
-	}
-
-	void AddScore(int inc) {
-		score += inc;
 	}
 }

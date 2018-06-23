@@ -14,7 +14,8 @@ public class Tween {
 
 	[HideInInspector]
 	public float time;
-
+	[HideInInspector]
+	public bool doStayAlive, isDead;
 
 	public Tween(float duration, EasingType easingType, EasingPhase easingPhase, System.Action<float> applyTransition, System.Action endTransition = null) {
 		this.duration = duration;
@@ -50,17 +51,22 @@ public class TweenManager : MonoBehaviour {
 			var next = node.Next;
 
 			var tween = node.Value;
-			tween.time += deltaTime;
-
-			if (tween.time < tween.duration) {
-				tween.applyTransition(Easing.Ease(tween.easingType, tween.easingPhase, tween.time, tween.duration));
-			} else {
-				if (tween.endTransition == null)
-					tween.applyTransition(1);
-				else
-					tween.endTransition();
-
-				tweenList.Remove(node);
+			if (!tween.isDead) {
+				tween.time += deltaTime;
+				
+				if (tween.time < tween.duration) {
+					tween.applyTransition(Easing.Ease(tween.easingType, tween.easingPhase, tween.time, tween.duration));
+				} else {
+					if (tween.endTransition == null)
+						tween.applyTransition(1);
+					else
+						tween.endTransition();
+					
+					if (!tween.doStayAlive)
+						tweenList.Remove(node);
+					else
+						tween.isDead = true;
+				}
 			}
 
 			node = next;
