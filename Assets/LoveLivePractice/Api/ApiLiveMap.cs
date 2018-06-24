@@ -15,6 +15,18 @@ namespace LoveLivePractice.Api {
 			result = Regex.Replace(result, @"\,]", @"]");
 			return result;
 		}
+
+		public LiveNote[] GetLiveNotes(AxisTransformer2 transformer) {
+			var list = new System.Collections.Generic.List<LiveNote>();
+			foreach (var note in lane) {
+				list.Add(new LiveNote(
+					transformer(note.lane, 0), 
+					note.starttime / 1000f, 
+					note.parallel, 
+					note.longnote));
+			}
+			return list.ToArray();
+		}
 	}
 
 	[System.Serializable]

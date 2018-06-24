@@ -15,33 +15,6 @@ public class LivePlayer : MonoBehaviour {
 	public static double Time, LastTime, AccTime, DeltaTime;
 	public static float Speed;
 
-	static readonly Vector2[] startSlots = {
-		new Vector2(-4f, 4f),
-		new Vector2(-3f, 3f),
-		new Vector2(-2f, 2f),
-		new Vector2(-1f, 1f),
-
-		new Vector2(0f, 0f),
-
-		new Vector2(1f, 1f),
-		new Vector2(2f, 2f),
-		new Vector2(3f, 3f),
-		new Vector2(4f, 4f),
-	};
-	static readonly Vector2[] slots = {
-		new Vector2(-2f, 2f),
-		new Vector2(-2f, 1f),
-		new Vector2(-1f, 1f),
-		new Vector2(-1f, 0f),
-
-		new Vector2(0f, 0f),
-
-		new Vector2(1f, 0f),
-		new Vector2(1f, 1f),
-		new Vector2(2f, 1f),
-		new Vector2(2f, 2f),
-	};
-
 	public static Heading GetEndHeading(Heading heading) {
 		return (Heading)(((int)heading + 4) % 8);
 	}
@@ -54,7 +27,6 @@ public class LivePlayer : MonoBehaviour {
 		float rotation = (-HeadingToRotation(Heading) - 90) * Mathf.Deg2Rad;
 		return new Vector3(Mathf.Cos(rotation), Mathf.Sin(rotation));
 	}
-
 
 	public const float BaseNormalScore = 100, BaseParaScore = 125;
 	public const float TimePerfect = 0.05f, TimeGreat = 0.15f, TimeGood = 0.2f, TimeBad = 0.5f;
@@ -138,9 +110,7 @@ public class LivePlayer : MonoBehaviour {
 	public Side leftSide = Side.Left, rightSide = Side.Right;
 	public Heading leftHeading = Heading.Down, rightHeading = Heading.Down;
 
-	ApiLive live;
-	ApiLiveMap map;
-	AudioClip bgm;
+	LiveNote[] notes;
 
 	System.Random rand;
 	double startTime;
@@ -174,23 +144,11 @@ public class LivePlayer : MonoBehaviour {
 			uiIncText.transform.localScale = new Vector3(size, size, size);
 		});
 		TweenManager.AddTween(uiIncTextTween, false);
+	}
 
-		using (var liveAsset = new FResource<TextAsset>("lives/" + liveName)) {
-			live = JsonUtility.FromJson<ApiLiveResponse>(liveAsset.asset.text).content;
-		}
-
-		using (var mapAsset = new FResource<TextAsset>("maps/" + live.map_path.Replace(".json", ""))) {
-			map = JsonUtility.FromJson<ApiLiveMap>(mapAsset.asset.text);
-
-			System.Array.Sort(map.lane);
-			foreach (var note in map.lane) {
-				note.starttime /= 1000f;
-				note.endtime /= 1000f;
-			}
-		}
-
-		bgm = Resources.Load<AudioClip>("bgms/" + live.bgm_path.Replace(".mp3", ""));
-		source.clip = bgm;
+	public void InitGame(LiveNote[] notes, AudioClip clip) {
+		this.notes = notes;
+		source.clip = clip;
 
 		StartGame();
 	}
@@ -244,14 +202,14 @@ public class LivePlayer : MonoBehaviour {
 
 		// Init new blocks
 		double bufferTime = Time + bufferInterval;
-		while (index < map.lane.Length && map.lane[index].starttime <= bufferTime) {
-			if (map.lane[index].parallel) {
+		while (index < notes.Length && notes[index].startTime <= bufferTime) {
+			if (notes[index].isPara) {
 				if (counter % level == 0)
-					InitBlock(map.lane[index], map.lane[index + 1]);
+					InitBlock(notes[index], notes[index + 1]);
 				index += 2;
 			} else {
 				if (counter % level == 0)
-					InitBlock(map.lane[index]);
+					InitBlock(notes[index]);
 				index += 1;
 			}
 
@@ -300,8 +258,8 @@ public class LivePlayer : MonoBehaviour {
 
 	#region Init Block
 
-	void InitBlock(ApiMapNote note1, ApiMapNote note2) {
-		if (note1.lane > note2.lane) {
+	void InitBlock(LiveNote note1, LiveNote note2) {
+		if (note1.x > note2.x) {
 			var temp = note2;
 			note2 = note1;
 			note1 = temp;
@@ -320,13 +278,14 @@ public class LivePlayer : MonoBehaviour {
 			UseRight(rightHeading, note2);
 	}
 
-	void InitBlock(ApiMapNote note) {
-		int lane = note.lane;
+	void InitBlock(LiveNote note) {
+		float lane = note.x;
+		const float middle = 10f;
 
 		// 1 3     6 8
 		//     [4]
 		// 0 2     5 7
-		if (lane < 4) {  // left side
+		if (lane < -middle) {  // left side
 			if (rightSide == Side.Left)
 				UseRight(rightHeading, note);
 			else if (leftSide == Side.Left)
@@ -335,7 +294,7 @@ public class LivePlayer : MonoBehaviour {
 				UseLeft(Heading.Right, note);
 				leftSide = Side.Left;
 			}
-		} else if (lane > 4) {  // right side
+		} else if (lane > middle) {  // right side
 			if (leftSide == Side.Right)
 				UseLeft(leftHeading, note);
 			else if (rightSide == Side.Right)
@@ -377,19 +336,19 @@ public class LivePlayer : MonoBehaviour {
 		return (Heading)(((int)heading + 8 + offset) % 8);
 	}
 
-	void UseLeft(Heading heading, ApiMapNote note) {
+	void UseLeft(Heading heading, LiveNote note) {
 		heading = GetDerivedHeading(heading);
 		CreateBlock(Side.Left, heading, note);
 		leftHeading = GetEndHeading(heading);
 	}
 
-	void UseRight(Heading heading, ApiMapNote note) {
+	void UseRight(Heading heading, LiveNote note) {
 		heading = GetDerivedHeading(heading);
 		CreateBlock(Side.Right, heading, note);
 		rightHeading = GetEndHeading(heading);
 	}
 
-	void CreateBlock(Side hand, Heading heading, ApiMapNote note) {
+	void CreateBlock(Side hand, Heading heading, LiveNote note) {
 		LiveBlock block = null;
 
 		var node = deadBlockList.First;
@@ -424,16 +383,14 @@ public class LivePlayer : MonoBehaviour {
 		block.heading = heading;
 
 		block.createTime = Time;
-		block.startTime = note.starttime;
-		block.isParallel = note.parallel;
-		block.isLong = note.longnote;
+		block.startTime = note.startTime;
+		block.isParallel = note.isPara;
+		block.isLong = note.isSpecial;
 
-		var slot = slots[note.lane];
-		var startSlot = startSlots[note.lane];
-		block.startX = startSlot.x;
-		block.startY = startSlot.y;
-		block.x = slot.x * 0.5f;
-		block.y = slot.y * 0.5f;
+		block.startX = note.x;
+		block.startY = note.y + 1;
+		block.x = note.x;
+		block.y = note.y;
 		block.transform.Rotate(HeadingToRotation(heading), 0, 0);
 
 		block.canvas.rotation = Quaternion.identity;
