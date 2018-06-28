@@ -19,9 +19,9 @@ public class BulidingMover : MonoBehaviour {
 	}
 
 	void Update() {
-		double time = LivePlayer.AccTime;
+		double time = MusicPlayer.AccTime;
 
-		transform.Rotate(curRotation * (float)LivePlayer.DeltaTime);
+		transform.Rotate(curRotation * (float)MusicPlayer.DeltaTime);
 
 		float duration = Mathf.Abs((maxZ - minZ) / LivePlayer.Speed);
 		if (time < startTime || time - startTime > duration) {

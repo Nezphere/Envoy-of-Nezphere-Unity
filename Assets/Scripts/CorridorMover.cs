@@ -50,7 +50,7 @@ public class CorridorMover : MonoBehaviour {
 	}
 
 	void Update() {
-		double time = LivePlayer.AccTime;
+		double time = MusicPlayer.AccTime;
 
 		if (isInTransition) {
 			if (time > releaseTime) {  // Release!

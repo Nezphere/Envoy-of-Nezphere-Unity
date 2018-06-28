@@ -15,12 +15,12 @@ public class SceneMover : MonoBehaviour {
 			var go = Instantiate(corridoProto, transform);
 			go.transform.localPosition = new Vector3(0, 0, i * spacing);
 		}
-		startTime = LivePlayer.Time;
+		startTime = MusicPlayer.AccTime;
 	}
 
 	void Update() {
 		float speed = -LivePlayer.Instance.bufferZ / LivePlayer.Instance.bufferInterval;
-		double time = LivePlayer.Time;
+		double time = MusicPlayer.AccTime;
 		float duration = Mathf.Abs(spacing / speed);
 		if (time < startTime || time - startTime > duration) {
 			startTime = time;

@@ -29,6 +29,7 @@ public class LoginUiController : MonoBehaviour {
 			} else {
 				uiErrorText.text = "";
 				uiResponseText.text = string.Format("| {0} |", req.downloadHandler.text);
+				GlobalStatic.Session = req.downloadHandler.text;
 			}
 		}
 	}

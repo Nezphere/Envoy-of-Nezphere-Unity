@@ -5,7 +5,7 @@ licenseType: Free
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
-  fontSize: 15
+  fontSize: 12
   forceTextureCase: -2
   characterSpacing: 0
   characterPadding: 1
@@ -15,7 +15,7 @@ TrueTypeFontImporter:
   - Zpix
   fallbackFontReferences: []
   customCharacters: 
-  fontRenderingMode: 0
+  fontRenderingMode: 3
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   userData: 

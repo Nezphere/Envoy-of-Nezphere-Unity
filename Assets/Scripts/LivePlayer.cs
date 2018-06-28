@@ -12,7 +12,6 @@ public class LivePlayer : MonoBehaviour {
 	#region Statics
 
 	public static LivePlayer Instance;
-	public static double Time, LastTime, AccTime, DeltaTime;
 	public static float Speed;
 
 	public static Heading GetEndHeading(Heading heading) {
@@ -62,7 +61,7 @@ public class LivePlayer : MonoBehaviour {
 	#endregion
 
 	public VrPlayer player;
-	public AudioSource source;
+	public MusicPlayer musicPlayer;
 	public SwordTip leftTip, rightTip;
 
 	[Header("Score")]
@@ -110,7 +109,8 @@ public class LivePlayer : MonoBehaviour {
 	public Side leftSide = Side.Left, rightSide = Side.Right;
 	public Heading leftHeading = Heading.Down, rightHeading = Heading.Down;
 
-	LiveNote[] notes;
+	[HideInInspector]
+	public LiveNote[] notes;
 
 	System.Random rand;
 	double startTime;
@@ -146,14 +146,7 @@ public class LivePlayer : MonoBehaviour {
 		TweenManager.AddTween(uiIncTextTween, false);
 	}
 
-	public void InitGame(LiveNote[] notes, AudioClip clip) {
-		this.notes = notes;
-		source.clip = clip;
-
-		StartGame();
-	}
-
-	void StartGame() {
+	public void StartGame() {
 		// Reset state
 		rand = new System.Random(seed);
 		leftSide = Side.Left;
@@ -163,16 +156,12 @@ public class LivePlayer : MonoBehaviour {
 
 		index = 0;
 		counter = 0;
-		startTime = AudioSettings.dspTime + startDelay;
-		LastTime = -startDelay;
-
-		source.PlayScheduled(startTime);
 
 		hasStarted = true;
-		isInPrelude = true;
+		isInPrelude = false;
 	}
 
-	void Update() {
+	public void ManualUpdate() {
 		player.ManualUpdate();
 		leftTip.ManualUpdate();
 		rightTip.ManualUpdate();
@@ -180,28 +169,16 @@ public class LivePlayer : MonoBehaviour {
 		if (!hasStarted)
 			return;
 
-		if (hasStarted && !isInPrelude && !source.isPlaying) {  // Replay
+		if (hasStarted && !isInPrelude && !MusicPlayer.IsPlaying) {  // Replay
 //			source.pitch *= 1.1f;
+			MusicPlayer.Restart();
 			StartGame();
 		}
-
-		if (isInPrelude) {
-			Time = AudioSettings.dspTime - startTime;
-			isInPrelude = Time < 0;
-		} else {
-			Time = source.time;
-		}
-
-		// Update time
-		Time += timeOffset;
-		DeltaTime = Time - LastTime;
-		LastTime = Time;
-		AccTime += DeltaTime;
 
 		Speed = bufferZ / bufferInterval;
 
 		// Init new blocks
-		double bufferTime = Time + bufferInterval;
+		double bufferTime = MusicPlayer.LiveTime + bufferInterval;
 		while (index < notes.Length && notes[index].startTime <= bufferTime) {
 			if (notes[index].isPara) {
 				if (counter % level == 0)
@@ -222,7 +199,7 @@ public class LivePlayer : MonoBehaviour {
 			var next = node.Next;
 
 			var block = node.Value;
-			if (shouldAutoPlay && (Math.Abs(Time - block.startTime) < TimePerfect || Time > block.startTime)) {
+			if (shouldAutoPlay && (Math.Abs(MusicPlayer.LiveTime - block.startTime) < TimePerfect || MusicPlayer.LiveTime > block.startTime)) {
 				block.hitSpeed = block.minDyingSpeed * 1.1f;
 				block.hitVelocity = HeadingToVector(block.heading) * block.hitSpeed;
 				block.shouldDie = true;
@@ -246,7 +223,7 @@ public class LivePlayer : MonoBehaviour {
 			var next = node.Next;
 
 			var deadBlock = node.Value;
-			if (deadBlock.startTime + recycleInterval + recycleGraceInterval < Time) {  // Ready to be revived
+			if (deadBlock.startTime + recycleInterval + recycleGraceInterval < MusicPlayer.LiveTime) {  // Ready to be revived
 				deadBlock.gameObject.SetActive(false);
 				inactiveBlockList.AddLast(deadBlock);
 				deadBlockList.Remove(node);
@@ -280,7 +257,7 @@ public class LivePlayer : MonoBehaviour {
 
 	void InitBlock(LiveNote note) {
 		float lane = note.x;
-		const float middle = 10f;
+		const float middle = 0.2f;
 
 		// 1 3     6 8
 		//     [4]
@@ -356,7 +333,7 @@ public class LivePlayer : MonoBehaviour {
 			var next = node.Next;
 
 			var deadBlock = node.Value;
-			if (deadBlock.startTime + recycleInterval < Time) {  // Ready to be revived
+			if (deadBlock.startTime + recycleInterval < MusicPlayer.LiveTime) {  // Ready to be revived
 				block = deadBlock;
 				deadBlockList.Remove(node);
 				break;
@@ -382,7 +359,7 @@ public class LivePlayer : MonoBehaviour {
 		block.Init(hand);
 		block.heading = heading;
 
-		block.createTime = Time;
+		block.createTime = MusicPlayer.LiveTime;
 		block.startTime = note.startTime;
 		block.isParallel = note.isPara;
 		block.isLong = note.isSpecial;
@@ -441,7 +418,7 @@ public class LivePlayer : MonoBehaviour {
 //		const float damping = 100;
 
 		if (!block.isClosed) {
-			double closeTime = LivePlayer.Time - block.createTime;
+			double closeTime = MusicPlayer.LiveTime - block.createTime;
 			if (closeTime > closeDuration) {
 				block.isClosed = true;
 				ParticleFxPool.Emit(closeParticleFxPreset, block.transform.position, block.transform.rotation);
@@ -455,16 +432,18 @@ public class LivePlayer : MonoBehaviour {
 			}
 		}
 
-		if (Time <= block.startTime) {  // Not yet
-			var x = Easing.Ease(bufferEasingTypeX, bufferEasingPhaseX, block.x, bufferX * block.startX, block.startTime - Time, bufferInterval);
-			var y = Easing.Ease(bufferEasingTypeY, bufferEasingPhaseY, block.y, bufferY * block.startY, block.startTime - Time, bufferInterval);
-			var z = Easing.Ease(bufferEasingTypeZ, bufferEasingPhaseZ, 0, bufferZ, block.startTime - Time, bufferInterval);
+		if (MusicPlayer.LiveTime <= block.startTime) {  // Not yet
+			var offset = block.startTime - MusicPlayer.LiveTime;
+			var x = Easing.Ease(bufferEasingTypeX, bufferEasingPhaseX, block.x, bufferX * block.startX, offset, bufferInterval);
+			var y = Easing.Ease(bufferEasingTypeY, bufferEasingPhaseY, block.y, bufferY * block.startY, offset, bufferInterval);
+			var z = Easing.Ease(bufferEasingTypeZ, bufferEasingPhaseZ, 0, bufferZ, offset, bufferInterval);
 //			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
 			block.transform.localPosition = new Vector3(x, y, z);
-		} else if (Time - block.startTime < cacheInterval && Time - block.startTime < TimeBad) {  // Over due
-			var x = Easing.Ease(cacheEasingTypeX, cacheEasingPhaseX, block.x, cacheX * block.x, Time - block.startTime, cacheInterval);
-			var y = Easing.Ease(cacheEasingTypeY, cacheEasingPhaseY, block.y, cacheY * block.y, Time - block.startTime, cacheInterval);
-			var z = Easing.Ease(cacheEasingTypeZ, cacheEasingPhaseZ, 0, cacheZ, Time - block.startTime, cacheInterval);
+		} else if (MusicPlayer.LiveTime - block.startTime < cacheInterval && MusicPlayer.LiveTime - block.startTime < TimeBad) {  // Over due
+			var offset = MusicPlayer.LiveTime - block.startTime;
+			var x = Easing.Ease(cacheEasingTypeX, cacheEasingPhaseX, block.x, cacheX * block.x, offset, cacheInterval);
+			var y = Easing.Ease(cacheEasingTypeY, cacheEasingPhaseY, block.y, cacheY * block.y, offset, cacheInterval);
+			var z = Easing.Ease(cacheEasingTypeZ, cacheEasingPhaseZ, 0, cacheZ, offset, cacheInterval);
 //			block.transform.localPosition = Vector3.Lerp(block.transform.localPosition, new Vector3(x, y, z), UnityEngine.Time.deltaTime * damping);
 			block.transform.localPosition = new Vector3(x, y, z);
 		} else {  // Miss
@@ -483,7 +462,7 @@ public class LivePlayer : MonoBehaviour {
 			combo = 0;
 		}
 
-		if (block.isClosed && Time - block.startTime < cacheInterval) {  // Detect collision
+		if (block.isClosed && MusicPlayer.LiveTime - block.startTime < cacheInterval) {  // Detect collision
 			if (block.side == Side.Left) {  // Left hand
 				if (Vector3.Dot(leftTip.velocity, -block.transform.up) > block.minDyingSpeed)
 					DetectCollision(leftTip, block);
@@ -516,7 +495,7 @@ public class LivePlayer : MonoBehaviour {
 	}
 
 	void KillBlock(LiveBlock block) {
-		double offset = Math.Abs(block.startTime - LivePlayer.Time);
+		double offset = Math.Abs(block.startTime - MusicPlayer.LiveTime);
 
 		if (offset <= TimeGood) {
 			combo += 1;

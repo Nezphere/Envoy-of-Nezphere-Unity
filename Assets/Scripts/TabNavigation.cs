@@ -35,12 +35,16 @@ public class TabNavigation : MonoBehaviour {
 						var nextLeft = current.FindSelectableOnLeft();
 
 						if (nextDown != null) {
+							print("select down " + nextDown.name);
 							nextDown.Select();
 						} else if (nextRight != null) {
+							print("select right " + nextRight.name);
 							nextRight.Select();
 						} else if (nextUp != null) {
+							print("select up " + nextUp.name);
 							nextUp.Select();
 						} else if (nextLeft != null) {
+							print("select left " + nextLeft.name);
 							nextLeft.Select();
 						}
 					}

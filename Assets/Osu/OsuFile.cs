@@ -36,7 +36,7 @@ public class OsuFile {
 			}
 
 			string field = line.Substring(0, index).Trim(), value = line.Substring(index + 1).Trim();
-			UnityEngine.Debug.Log(field + " : " + value);
+//			UnityEngine.Debug.Log(field + " : " + value);
 			switch (field) {
 			case "AudioFilename":
 				AudioFilename = value;
@@ -91,14 +91,19 @@ public class OsuFile {
 
 	public LiveNote[] GetLiveNotes(AxisTransformer2 transformer) {
 		var list = new System.Collections.Generic.List<LiveNote>();
-		int lastTime = -1;
+		OsuHitObject lastObject = null;
 		foreach (var hitObject in HitObjects) {
+			bool isPara = lastObject != null && lastObject.time == hitObject.time;
+			if (isPara) {
+				list[list.Count - 1].isPara = true;
+			}
+
 			list.Add(new LiveNote(
 				transformer(hitObject.x / 512f, hitObject.y / 384f), 
 				hitObject.time / 1000f, 
-				hitObject.time == lastTime, 
-				(hitObject.type & 1) == 0));
-			lastTime = hitObject.time;
+				isPara, 
+				(hitObject.hitSound != 0)));
+			lastObject = hitObject;
 		}
 		return list.ToArray();
 	}

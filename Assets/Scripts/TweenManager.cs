@@ -31,16 +31,21 @@ public class Tween {
 
 		return this;
 	}
+
+	public Tween CreateTransition(System.Action<float> applyTransition, System.Action endTransition = null) {
+		return new Tween(duration, easingType, easingPhase, applyTransition, endTransition);
+	}
 }
 
 public class TweenManager : MonoBehaviour {
 	static readonly LinkedList<Tween> tweenList = new LinkedList<Tween>();
 
-	public static void AddTween(Tween tween, bool doStartInstantly = true) {
+	public static WaitForSeconds AddTween(Tween tween, bool doStartInstantly = true) {
 		if (doStartInstantly) {
 			tween.applyTransition(0);
 		}
 		tweenList.AddLast(tween);
+		return new WaitForSeconds(tween.duration);
 	}
 
 	void Update() {

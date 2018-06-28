@@ -50,6 +50,7 @@ public class LlpLiveStarter : MonoBehaviour {
 
 		var notes = map.GetLiveNotes((x, _) => slots[Mathf.RoundToInt(x)] * 0.5f);
 
-		GetComponent<LivePlayer>().InitGame(notes, bgm);
+		GetComponent<LivePlayer>().notes = notes;
+		GetComponent<LivePlayer>().StartGame();
 	}
 }

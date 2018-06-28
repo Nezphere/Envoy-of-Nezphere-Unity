@@ -9,10 +9,13 @@ public class LiveBlock : MonoBehaviour {
 	public Text uiScoreText, uiJudgeText, uiComboText;
 	public Transform canvas, uiDirectionTrans;
 
+	public Rigidbody leftShellRigid, leftCoreRigid;
+	public Rigidbody rightShellRigid, rightCoreRigid;
+
 	[Header("Config")]
 	public Side side;
 	public float minDyingSpeed = 12;
-	public float velocityScaling = 1, randomForce = 1, randomTorque = 1;
+	public float velocityScaling = 1, coreVelocityScaling, shellVelocityScaling, randomForce = 1, randomTorque = 1;
 	public Material leftMaterial, rightMaterial;
 
 	[Header("Close")]
@@ -62,9 +65,15 @@ public class LiveBlock : MonoBehaviour {
 	}
 
 	public void Die() {
+
+		var inheritVelocity = hitVelocity * velocityScaling;
+		leftShellRigid.velocity = inheritVelocity + transform.forward * hitSpeed * shellVelocityScaling;
+		leftCoreRigid.velocity = inheritVelocity + transform.forward * hitSpeed * coreVelocityScaling;
+		rightShellRigid.velocity = inheritVelocity - transform.forward * hitSpeed * shellVelocityScaling;
+		rightCoreRigid.velocity = inheritVelocity - transform.forward * hitSpeed * coreVelocityScaling;
 		foreach (var rigid in GetComponentsInChildren<Rigidbody>()) {
 			rigid.isKinematic = false;
-			rigid.velocity = hitVelocity * velocityScaling;
+			//			rigid.velocity = hitVelocity * velocityScaling;
 			rigid.AddRelativeForce(Random.insideUnitSphere * randomForce, ForceMode.Impulse);
 			rigid.AddTorque(Random.insideUnitSphere * randomTorque, ForceMode.Impulse);
 		}

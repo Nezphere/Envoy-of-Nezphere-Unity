@@ -35,7 +35,7 @@ public class PillarMover : MonoBehaviour {
 			}
 		}
 
-		StartNew(LivePlayer.AccTime);
+		StartNew(MusicPlayer.AccTime);
 	}
 
 	void StartNew(double time) {
@@ -61,7 +61,7 @@ public class PillarMover : MonoBehaviour {
 		}
 
 		float duration = Mathf.Abs((selectedConfig.maxZ - selectedConfig.minZ) / LivePlayer.Speed);
-		double time = LivePlayer.AccTime;
+		double time = MusicPlayer.AccTime;
 
 		if (time < startTime || time - startTime > duration) {
 			StartNew(time);
