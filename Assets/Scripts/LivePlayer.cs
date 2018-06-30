@@ -105,7 +105,7 @@ public class LivePlayer : MonoBehaviour {
 
 	[Header("Game State")]
 	public int score;
-	public int combo, maxCombo;
+	public int combo, maxCombo, perfect, great, good, bad, miss, total;
 	public Side leftSide = Side.Left, rightSide = Side.Right;
 	public Heading leftHeading = Heading.Down, rightHeading = Heading.Down;
 
@@ -154,8 +154,8 @@ public class LivePlayer : MonoBehaviour {
 		leftHeading = Heading.Down;
 		rightHeading = Heading.Down;
 
-		index = 0;
-		counter = 0;
+		index = counter = 0;
+		score = combo = maxCombo = perfect = great = good = bad = miss = total = 0;
 
 		hasStarted = true;
 		isInPrelude = false;
@@ -171,8 +171,11 @@ public class LivePlayer : MonoBehaviour {
 
 		if (hasStarted && !isInPrelude && !MusicPlayer.IsPlaying) {  // Replay
 //			source.pitch *= 1.1f;
-			MusicPlayer.Restart();
-			StartGame();
+//			MusicPlayer.Restart();
+//			StartGame();
+			GameScheduler.Instance.isSongFinished = true;
+			hasStarted = false;
+			return;
 		}
 
 		Speed = bufferZ / bufferInterval;
@@ -374,6 +377,7 @@ public class LivePlayer : MonoBehaviour {
 //		block.uiDirectionTrans.localEulerAngles = new Vector3(0, 0, -HeadingToRotation(heading));
 
 		liveBlockList.AddLast(block);
+		total += 1;
 	}
 
 	#endregion
@@ -460,6 +464,8 @@ public class LivePlayer : MonoBehaviour {
 			block.shouldDie = true;
 			block.shouldDieSilently = true;
 			combo = 0;
+
+			miss += 1;
 		}
 
 		if (block.isClosed && MusicPlayer.LiveTime - block.startTime < cacheInterval) {  // Detect collision
@@ -508,6 +514,7 @@ public class LivePlayer : MonoBehaviour {
 		float inc = block.isParallel ? BaseParaScore : BaseNormalScore;
 		inc *= GetScoreOffsetAddon(offset) * GetScoreComboAddon(combo);
 		score += (int)inc;
+		GameScheduler.Instance.SetScore(score);
 
 		AudioFxConfig audioConfig;
 		Material material;
@@ -515,21 +522,29 @@ public class LivePlayer : MonoBehaviour {
 //		float scale;
 		if (offset <= TimePerfect) {
 //			scale = 2;
+			perfect += 1;
 			material = perfectMaterial;
 			text = perfectText;
 			audioConfig = block.isLong ? specialAudioConfigs[Random.Range(0, specialAudioConfigs.Length)] : perfectAudioConfigs[Random.Range(0, perfectAudioConfigs.Length)];
 		} else if (offset <= TimeGreat) {
 //			scale = 1.5f;
+			great += 1;
 			material = greatMaterial;
 			text = greatText;
 			audioConfig = greatAudioConfigs[Random.Range(0, greatAudioConfigs.Length)];
 		} else if (offset <= TimeGood) {
 //			scale = 1;
+			good += 1;
 			material = goodMaterial;
 			text = goodText;
 			audioConfig = goodAudioConfigs[Random.Range(0, goodAudioConfigs.Length)];
 		} else {  // if (offset <= TimeBad)
 //			scale = 0.5f;
+			if (offset <= TimeBad) {
+				bad += 1;
+			} else {
+				miss += 1;
+			}
 			material = badMaterial;
 			text = badText;
 			audioConfig = badAudioConfigs[Random.Range(0, badAudioConfigs.Length)];

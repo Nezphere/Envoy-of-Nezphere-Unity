@@ -5,5 +5,5 @@ using UnityEngine;
 public static class GlobalStatic {
 	public static bool IsLoggedIn { get { return !string.IsNullOrEmpty(Session); } }
 
-	public static string Session;
+	public static string Session = "", Name = "--";
 }
