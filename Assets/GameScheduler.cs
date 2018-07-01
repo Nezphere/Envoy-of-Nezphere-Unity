@@ -43,6 +43,7 @@ public class GameScheduler : MonoBehaviour {
 	[Header("Result Panel")]
 	public RectTransform uiResultPanel;
 	public ResultPanelUiController resultPanelUiController;
+	public bool willRetry, willShowMenu;
 	float acc;
 
 	void Awake() {
@@ -66,11 +67,20 @@ public class GameScheduler : MonoBehaviour {
 		}));
 		uiWelcomePanel.gameObject.SetActive(false);
 
+
 		uiLoginPanel.gameObject.SetActive(true);
 		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
 			uiLoginPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(0, 80), step);
 		}));
 
+
+		if (!string.IsNullOrEmpty(PlayerPrefs.GetString("friend_name", ""))) {
+			uiLoginNameInput.text = PlayerPrefs.GetString("friend_name");
+			uiLoginPassInput.text = PlayerPrefs.GetString("friend_pass");
+			OnLoginButtonClicked();
+		}
+
+		isLoginFinished = false;
 		eventSystem.enabled = true;
 		while (!isLoginFinished)
 			yield return null;
@@ -81,12 +91,14 @@ public class GameScheduler : MonoBehaviour {
 		}));
 		uiLoginPanel.gameObject.SetActive(false);
 
+		SONG_SELECT:
 		uiSongPanel.gameObject.SetActive(true);
 		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
 			uiSongPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(0, 0), step);
 		}));
 
 		eventSystem.enabled = true;
+		isSongSelectFinished = false;
 		while (!isSongSelectFinished)
 			yield return null;
 		eventSystem.enabled = false;
@@ -113,7 +125,6 @@ public class GameScheduler : MonoBehaviour {
 		ranks.Add(rank);
 		rankPanelController.SetRank(ranks.ToArray());
 
-		StartCoroutine(HandleRankInit());
 		print(osuFile.path);
 		print(osuFile.AudioFilename);
 		musicPlayer.Play(System.IO.Path.Combine(osuFile.path, osuFile.AudioFilename));
@@ -122,8 +133,16 @@ public class GameScheduler : MonoBehaviour {
 		livePlayer.notes = notes;
 		livePlayer.StartGame();
 
+		SONG_START:
+		StartCoroutine(HandleRankInit());
+		isSongFinished = false;
 		while (!isSongFinished)
 			yield return null;
+
+		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
+			uiRankPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(-400, 0), new Vector2(0, 5000), step);
+			uiScorePanel.anchoredPosition3D = Vector3.LerpUnclamped(new Vector3(0, 70, 100), new Vector3(0, 5000, 0), step);
+		}));
 
 		uiResultPanel.gameObject.SetActive(true);
 		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
@@ -135,7 +154,33 @@ public class GameScheduler : MonoBehaviour {
 			false, livePlayer.score, livePlayer.perfect, livePlayer.great, livePlayer.good, livePlayer.bad, livePlayer.miss,
 			false, livePlayer.maxCombo, livePlayer.maxCombo >= livePlayer.total);
 
-		StartCoroutine(HandleSubmitResult());
+		if (GlobalStatic.IsLoggedIn) {
+			StartCoroutine(HandleSubmitResult());
+		}
+
+		willRetry = willShowMenu = false;
+		eventSystem.enabled = true;
+		uiCamera.enabled = true;
+		while (!willRetry && !willShowMenu)
+			yield return null;
+		uiCamera.enabled = false;
+		eventSystem.enabled = false;
+
+		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
+			uiResultPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 0), new Vector2(0, 5000), step);
+		}));
+
+		if (willRetry) {
+			livePlayer.StartGame();
+			MusicPlayer.Restart();
+			yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
+				uiRankPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(-400, 0), step);
+				uiScorePanel.anchoredPosition3D = Vector3.LerpUnclamped(new Vector3(0, 5000, 0), new Vector3(0, 70, 100), step);
+			}));
+			goto SONG_START;
+		} else {
+			goto SONG_SELECT;
+		}
 	}
 
 	IEnumerator HandleSubmitResult() {
@@ -150,11 +195,14 @@ public class GameScheduler : MonoBehaviour {
 		form.AddField("good", livePlayer.good);
 		form.AddField("bad", livePlayer.bad);
 		form.AddField("miss", livePlayer.miss);
+		form.AddField("session", GlobalStatic.Session);
 
 		using (var req = UnityWebRequest.Post(ApiUrl + "/trials/submit", form)) {
 			yield return req.SendWebRequest();
 			if (!req.isNetworkError && !req.isHttpError) {
 				resultPanelUiController.SetRank(req.downloadHandler.text);
+			} else {
+				ApiErrorText(req);
 			}
 		}
 	}
@@ -177,6 +225,8 @@ public class GameScheduler : MonoBehaviour {
 				ranks.AddRange(rankRes.ranking);
 				ranks.Sort();
 				rankPanelController.SetRank(ranks.ToArray());
+			} else {
+				ApiErrorText(req);
 			}
 		}
 	}
@@ -193,8 +243,9 @@ public class GameScheduler : MonoBehaviour {
 		eventSystem.enabled = false;
 
 		var form = new WWWForm();
-		form.AddField("name", uiLoginNameInput.text);
-		form.AddField("pass", uiLoginPassInput.text);
+		string name = uiLoginNameInput.text, pass = uiLoginPassInput.text;
+		form.AddField("name", name);
+		form.AddField("pass", pass);
 
 		using (var req = UnityWebRequest.Post(ApiUrl + "/friends/login", form)) {
 			yield return req.SendWebRequest();
@@ -204,7 +255,9 @@ public class GameScheduler : MonoBehaviour {
 				uiErrorText.text = "";
 				uiLoginResponseText.text = CapText("login successful");
 				GlobalStatic.Session = req.downloadHandler.text;
-				GlobalStatic.Name = uiLoginNameInput.text;
+				GlobalStatic.Name = name;
+				PlayerPrefs.SetString("friend_name", name);
+				PlayerPrefs.SetString("friend_pass", pass);
 				isLoginFinished = true;
 			}
 		}
@@ -252,6 +305,14 @@ public class GameScheduler : MonoBehaviour {
 	public void OnOsuSongSelected(OsuFile file) {
 		osuFile = file;
 		isSongSelectFinished = true;
+	}
+
+	public void OnRetryButtonClicked() {
+		willRetry = true;
+	}
+
+	public void OnMenuButtonClicked() {
+		willShowMenu = true;
 	}
 }
 

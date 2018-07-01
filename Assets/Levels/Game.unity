@@ -392,7 +392,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &121305692
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,6 +450,10 @@ MonoBehaviour:
   isSongFinished: 0
   musicPlayer: {fileID: 1279522814}
   livePlayer: {fileID: 1279522808}
+  uiResultPanel: {fileID: 1103312102}
+  resultPanelUiController: {fileID: 1103312103}
+  willRetry: 0
+  willShowMenu: 0
 --- !u!4 &121305693
 Transform:
   m_ObjectHideFlags: 0
@@ -1052,7 +1056,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 2
+    m_Mode: 1
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1080,7 +1084,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 121305692}
-        m_MethodName: OnLoginButtonClicked
+        m_MethodName: OnRetryButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1282,7 +1286,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 10000
-  field of view: 60
+  field of view: 90
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -4482,7 +4486,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1103312102
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5277,6 +5281,12 @@ MonoBehaviour:
   score: 0
   combo: 0
   maxCombo: 0
+  perfect: 0
+  great: 0
+  good: 0
+  bad: 0
+  miss: 0
+  total: 0
   leftSide: 0
   rightSide: 1
   leftHeading: 6
@@ -18409,7 +18419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 2
+    m_Mode: 1
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -18437,7 +18447,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 121305692}
-        m_MethodName: OnLoginButtonClicked
+        m_MethodName: OnMenuButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -22925,7 +22935,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 90
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -22937,7 +22947,7 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 0
   m_HDR: 1
-  m_AllowMSAA: 1
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1

@@ -202,11 +202,13 @@ public class LivePlayer : MonoBehaviour {
 			var next = node.Next;
 
 			var block = node.Value;
-			if (shouldAutoPlay && (Math.Abs(MusicPlayer.LiveTime - block.startTime) < TimePerfect || MusicPlayer.LiveTime > block.startTime)) {
+			#if UNITY_EDITOR
+			if (shouldAutoPlay && MusicPlayer.LiveTime > block.startTime) {
 				block.hitSpeed = block.minDyingSpeed * 1.1f;
 				block.hitVelocity = HeadingToVector(block.heading) * block.hitSpeed;
 				block.shouldDie = true;
 			}
+			#endif
 			
 			if (block.shouldDie) {
 				if (!block.shouldDieSilently)

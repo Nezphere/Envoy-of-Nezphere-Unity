@@ -11,7 +11,7 @@ public class RankInfo : System.IComparable<RankInfo> {
 	public int score;
 
 	public int CompareTo(RankInfo other) {
-		return score.CompareTo(other.score);
+		return other.score.CompareTo(score);
 	}
 }
 

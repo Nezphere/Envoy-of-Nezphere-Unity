@@ -33,6 +33,7 @@ public class ResultPanelUiController : MonoBehaviour {
 		uiScoreNewText.gameObject.SetActive(isScoreNew);
 		uiComboNewText.gameObject.SetActive(isComboNew);
 		uiFullComboText.gameObject.SetActive(isFullCombo);
+		uiRankText.text = "--";
 
 		TweenManager.AddTween(tween.CreateTransition(step => {
 			uiTitleText.text = titleLerp.Lerp(step);
