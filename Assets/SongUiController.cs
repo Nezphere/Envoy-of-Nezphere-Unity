@@ -20,7 +20,7 @@ public class SongUiController : MonoBehaviour {
 				print(file);
 				string name = Path.GetFileNameWithoutExtension(file);
 				if (!System.Array.Exists(dirs, e => e == name)) {  // New .osz
-					var resultPath = Path.Combine(path, name.Substring(0, 6));
+					var resultPath = Path.Combine(path, name);
 					Directory.CreateDirectory(resultPath);
 					Debug.Log(file + " => " + resultPath);
 					ExtractZipFile(file, resultPath);

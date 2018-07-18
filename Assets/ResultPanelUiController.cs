@@ -22,7 +22,7 @@ public class ResultPanelUiController : MonoBehaviour {
 		string title, string version, string acc,
 		bool isScoreNew, int score, int perfect, int great, int good, int bad, int miss,
 		bool isComboNew, int combo, bool isFullCombo) {
-
+		acc = acc.Replace(" ", "");
 		StringLerp titleLerp = new StringLerp("", title), versionLerp = new StringLerp("", version.ToUpper()),
 		accLerp = new StringLerp("0<size=15>%</size>", acc.Insert(acc.Length - 1, "<size=15>") + "</size>"),
 		scoreLerp = new StringLerp("0", score.ToString()), perfectLerp = new StringLerp("0", perfect.ToString()), 

@@ -29,6 +29,30 @@ public sealed class VrPlayer : MonoBehaviour {
 		public const string WMR_B_R_PAD_PRESS = "WMR_B_R_PAD_PRESS";
 	}
 
+	public enum WmrInputEnum {
+		WMR_A_L_TRIGGER,
+		WMR_A_R_TRIGGER,
+		WMR_A_L_GRIP,
+		WMR_A_R_GRIP,
+		WMR_A_L_STICK_X,
+		WMR_A_L_STICK_Y,
+		WMR_A_R_STICK_X,
+		WMR_A_R_STICK_Y,
+		WMR_A_L_PAD_X,
+		WMR_A_L_PAD_Y,
+		WMR_A_R_PAD_X,
+		WMR_A_R_PAD_Y,
+
+		WMR_B_L_MENU,
+		WMR_B_R_MENU,
+		WMR_B_L_STICK_PRESS,
+		WMR_B_R_STICK_PRESS,
+		WMR_B_L_PAD_TOUCH,
+		WMR_B_R_PAD_TOUCH,
+		WMR_B_L_PAD_PRESS,
+		WMR_B_R_PAD_PRESS,
+	}
+
 	void Start() {
 		var position = Vector3.zero;
 		position.x = PlayerPrefs.GetFloat("player_position_x");

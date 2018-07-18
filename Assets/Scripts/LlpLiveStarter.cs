@@ -5,7 +5,7 @@ using UnityEngine;
 using LoveLivePractice.Api;
 
 public class LlpLiveStarter : MonoBehaviour {
-	static readonly Vector2[] startSlots = {
+	public static readonly Vector2[] startSlots = {
 		new Vector2(-4f, 4f),
 		new Vector2(-3f, 3f),
 		new Vector2(-2f, 2f),
@@ -18,18 +18,18 @@ public class LlpLiveStarter : MonoBehaviour {
 		new Vector2(3f, 3f),
 		new Vector2(4f, 4f),
 	};
-	static readonly Vector2[] slots = {
-		new Vector2(-2f, 2f),
+	public static readonly Vector2[] slots = {
 		new Vector2(-2f, 1f),
-		new Vector2(-1f, 1f),
+		new Vector2(-2f, 0.5f),
+		new Vector2(-1f, 0.5f),
 		new Vector2(-1f, 0f),
 
 		new Vector2(0f, 0f),
 
 		new Vector2(1f, 0f),
-		new Vector2(1f, 1f),
+		new Vector2(1f, 0.5f),
+		new Vector2(2f, 0.5f),
 		new Vector2(2f, 1f),
-		new Vector2(2f, 2f),
 	};
 
 	public string liveName;
@@ -45,10 +45,10 @@ public class LlpLiveStarter : MonoBehaviour {
 			map = JsonUtility.FromJson<ApiLiveMap>(mapAsset.asset.text);
 			System.Array.Sort(map.lane);
 		}
+			
+		var notes = map.GetLiveNotes((x, _) => slots[Mathf.RoundToInt(x)], 2);
 
-		var bgm = Resources.Load<AudioClip>("bgms/" + live.bgm_path.Replace(".mp3", ""));
-
-		var notes = map.GetLiveNotes((x, _) => slots[Mathf.RoundToInt(x)] * 0.5f);
+		//		var bgm = Resources.Load<AudioClip>("bgms/" + live.bgm_path.Replace(".mp3", ""));
 
 		GetComponent<LivePlayer>().notes = notes;
 		GetComponent<LivePlayer>().StartGame();

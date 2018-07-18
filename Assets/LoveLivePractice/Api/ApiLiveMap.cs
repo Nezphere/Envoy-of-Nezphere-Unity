@@ -16,14 +16,20 @@ namespace LoveLivePractice.Api {
 			return result;
 		}
 
-		public LiveNote[] GetLiveNotes(AxisTransformer2 transformer) {
+		public LiveNote[] GetLiveNotes(AxisTransformer2 transformer, int level) {
+			int counter = 0;
 			var list = new System.Collections.Generic.List<LiveNote>();
+
 			foreach (var note in lane) {
-				list.Add(new LiveNote(
-					transformer(note.lane, 0), 
-					note.starttime / 1000f, 
-					note.parallel, 
-					note.longnote));
+				if (counter % level == 0) {
+					list.Add(new LiveNote(
+						transformer(note.lane, 0), 
+						note.starttime / 1000f, 
+						false, 
+						note.longnote));
+				}
+
+				counter += 1;
 			}
 			return list.ToArray();
 		}

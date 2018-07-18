@@ -4,22 +4,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 
-public class SongItemUiController : MonoBehaviour {
+using LoveLivePractice.Api;
+
+public class LlpSongItemUiController : MonoBehaviour {
 	public Text uiLeftText, uiMiddleText, uiRightText;
-	public OsuFile osuFile;
+	public ApiLive live;
 
 
-	public void Init(OsuFile osuFile) {
-		this.osuFile = osuFile;
+	public void Init(ApiLive live) {
+		this.live = live;
 
 		uiLeftText.text = string.Format(
 			"<size=12>{0}</size>\n<size=10>{1}</size>", 
-			osuFile.Version, 
-			osuFile.Source);
+			live.category.name, 
+			"by " + live.upload_user.username);
 		uiMiddleText.text = string.Format(
-			"<size=12>{0}</size>\n<size=8>{1}</size>", 
-			string.IsNullOrEmpty(osuFile.TitleUnicode) ? osuFile.Title : osuFile.TitleUnicode, 
-			string.IsNullOrEmpty(osuFile.ArtistUnicode) ? osuFile.Artist : osuFile.ArtistUnicode);
+			"<size=12>{0}</size>\n<size=8>{1}</size>", live.live_name, live.artist);
 		uiRightText.text = string.Format(
 			"<size=14>{0}</size>\n<size=12>{1}</size>", 
 			"--", 
@@ -31,12 +31,12 @@ public class SongItemUiController : MonoBehaviour {
 	}
 
 	IEnumerator InitHandler() {
-		if (string.IsNullOrEmpty(osuFile.BeatmapID))
+		if (string.IsNullOrEmpty(live.live_id))
 			yield break;
 
 		var form = new WWWForm();
 		form.AddField("session", GlobalStatic.Session);
-		form.AddField("hash", osuFile.BeatmapID);
+		form.AddField("hash", live.live_id);
 
 		using (var req = UnityWebRequest.Post(GameScheduler.ApiUrl + "/trials/high-score", form)) {
 			yield return req.SendWebRequest();
@@ -51,6 +51,6 @@ public class SongItemUiController : MonoBehaviour {
 	}
 
 	public void OnButtonClicked() {
-		GameScheduler.Instance.OnOsuSongSelected(osuFile);
+		GameScheduler.Instance.OnLlpSongSelected(live);
 	}
 }

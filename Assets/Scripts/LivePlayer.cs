@@ -166,6 +166,10 @@ public class LivePlayer : MonoBehaviour {
 		leftTip.ManualUpdate();
 		rightTip.ManualUpdate();
 
+		if (Input.GetKeyDown(KeyCode.Escape)) {
+			Application.Quit();
+		}
+
 		if (!hasStarted)
 			return;
 
@@ -268,6 +272,7 @@ public class LivePlayer : MonoBehaviour {
 		//     [4]
 		// 0 2     5 7
 		if (lane < -middle) {  // left side
+//			print("left " + lane);
 			if (rightSide == Side.Left)
 				UseRight(rightHeading, note);
 			else if (leftSide == Side.Left)
@@ -277,6 +282,7 @@ public class LivePlayer : MonoBehaviour {
 				leftSide = Side.Left;
 			}
 		} else if (lane > middle) {  // right side
+//			print("right " + lane);
 			if (leftSide == Side.Right)
 				UseLeft(leftHeading, note);
 			else if (rightSide == Side.Right)
@@ -331,6 +337,7 @@ public class LivePlayer : MonoBehaviour {
 	}
 
 	void CreateBlock(Side hand, Heading heading, LiveNote note) {
+//		print("create " + hand + " " + heading);
 		LiveBlock block = null;
 
 		var node = deadBlockList.First;

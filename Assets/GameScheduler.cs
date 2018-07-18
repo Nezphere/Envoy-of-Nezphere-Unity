@@ -5,17 +5,23 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 
-using Uif;
+using VrInput;
+using LoveLivePractice.Api;
 
 public class GameScheduler : MonoBehaviour {
-	public const string ApiUrl = "http://localhost:3000/v1";
+	//	#if UNITY_EDITOR
+	//	public const string ApiUrl = "http://localhost:3000/v1";
+	//	#else
+	public const string ApiUrl = "https://api.nezphere.com/v1";
+	//	#endif
 	public static GameScheduler Instance;
 
 	public RectTransform uiWelcomePanel;
 
-	public Camera vrCamera, uiCamera;
+	//	public Camera vrCamera, uiCamera;
 
 	public EventSystem eventSystem;
+	public LaserVrPointer pointer;
 	public Text uiErrorText;
 
 	public Tween panelShowTween, panelHideTween;
@@ -30,9 +36,12 @@ public class GameScheduler : MonoBehaviour {
 	public RectTransform uiSongPanel;
 	public bool isSongSelectFinished;
 	public OsuFile osuFile;
+	public ApiLive live;
+	public int selectedFileType;
+	public string mapHash, mapName, mapVersion;
 
 	[Header("Game Panels")]
-	public RectTransform uiRankPanel, uiScorePanel;
+	public RectTransform uiRankPanel, uiScorePanel, uiHintPanel;
 	public RankPanelController rankPanelController;
 	readonly List<RankInfo> ranks = new List<RankInfo>();
 	readonly RankInfo rank = new RankInfo();
@@ -48,6 +57,12 @@ public class GameScheduler : MonoBehaviour {
 
 	void Awake() {
 		Instance = this;
+
+		Application.logMessageReceived += (condition, stackTrace, type) => {
+			if (type == LogType.Error || type == LogType.Exception) {
+				uiErrorText.text = stackTrace;
+			}
+		};
 	}
 
 	IEnumerator Start() {
@@ -82,9 +97,11 @@ public class GameScheduler : MonoBehaviour {
 
 		isLoginFinished = false;
 		eventSystem.enabled = true;
+		pointer.SetActive(true);
 		while (!isLoginFinished)
 			yield return null;
 		eventSystem.enabled = false;
+		pointer.SetActive(false);
 
 		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
 			uiLoginPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 80), new Vector2(0, -5000), step);
@@ -98,25 +115,33 @@ public class GameScheduler : MonoBehaviour {
 		}));
 
 		eventSystem.enabled = true;
+		pointer.SetActive(true);
+
 		isSongSelectFinished = false;
+		selectedFileType = -1;
 		while (!isSongSelectFinished)
 			yield return null;
 		eventSystem.enabled = false;
+		pointer.SetActive(false);
 
 		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
 			uiSongPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 0), new Vector2(0, -5000), step);
 		}));
 		uiSongPanel.gameObject.SetActive(false);
 
-		uiCamera.enabled = false;
+//		uiCamera.enabled = false;
 
 		uiRankPanel.gameObject.SetActive(true);
 		uiScorePanel.gameObject.SetActive(true);
+		uiHintPanel.gameObject.SetActive(true);
 		rankPanelController.SetRank(new RankInfo[0]);
 		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
 			uiRankPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(-400, 0), step);
 			uiScorePanel.anchoredPosition3D = Vector3.LerpUnclamped(new Vector3(0, 5000, 0), new Vector3(0, 70, 100), step);
+			uiHintPanel.anchoredPosition3D = Vector3.LerpUnclamped(new Vector3(0, 0, 5000), Vector3.zero, step);
 		}));
+
+		StartCoroutine(HandleCloseHintPanel());
 
 		rank.name = GlobalStatic.Name;
 		rank.rank = "--";
@@ -125,15 +150,25 @@ public class GameScheduler : MonoBehaviour {
 		ranks.Add(rank);
 		rankPanelController.SetRank(ranks.ToArray());
 
-		print(osuFile.path);
-		print(osuFile.AudioFilename);
-		musicPlayer.Play(System.IO.Path.Combine(osuFile.path, osuFile.AudioFilename));
-		var notes = osuFile.GetLiveNotes((x, y) => new Vector2((x - 0.5f) * 4, y * 1.5f - 0.5f));
+		LiveNote[] notes = null;
+
+		if (selectedFileType == 0) {
+			notes = osuFile.GetLiveNotes((x, y) => new Vector2((x - 0.5f) * 4, y * 1.5f - 0.5f));
+			musicPlayer.Play(System.IO.Path.Combine(osuFile.path, osuFile.AudioFilename));
+		} else {  // selectedFileType == 1
+			using (var mapAsset = new FResource<TextAsset>("maps/" + live.map_path.Replace(".json", ""))) {
+				var map = JsonUtility.FromJson<ApiLiveMap>(mapAsset.asset.text);
+				System.Array.Sort(map.lane);
+				notes = map.GetLiveNotes((x, _) => LlpLiveStarter.slots[Mathf.RoundToInt(x)] * 0.75f, 2);
+			}
+			musicPlayer.Play(System.IO.Path.Combine(Application.persistentDataPath, live.bgm_path));
+		}
 
 		livePlayer.notes = notes;
 		livePlayer.StartGame();
 
 		SONG_START:
+		uiErrorText.text = "";
 		StartCoroutine(HandleRankInit());
 		isSongFinished = false;
 		while (!isSongFinished)
@@ -145,14 +180,14 @@ public class GameScheduler : MonoBehaviour {
 		}));
 
 		uiResultPanel.gameObject.SetActive(true);
+		acc = (300f * livePlayer.perfect + 200f * livePlayer.great + 100f * livePlayer.good + 50f * livePlayer.bad) / (300f * livePlayer.total);
+		resultPanelUiController.SetResults(mapName, mapVersion, acc.ToString("P0"),
+			false, livePlayer.score, livePlayer.perfect, livePlayer.great, livePlayer.good, livePlayer.bad, livePlayer.miss,
+			false, livePlayer.maxCombo, livePlayer.maxCombo >= livePlayer.total);
+		
 		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
 			uiResultPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(0, 0), step);
 		}));
-
-		acc = (300f * livePlayer.perfect + 200f * livePlayer.great + 100f * livePlayer.good + 50f * livePlayer.bad) / (300f * livePlayer.total);
-		resultPanelUiController.SetResults(osuFile.TitleUnicode, osuFile.Version, acc.ToString("P0"),
-			false, livePlayer.score, livePlayer.perfect, livePlayer.great, livePlayer.good, livePlayer.bad, livePlayer.miss,
-			false, livePlayer.maxCombo, livePlayer.maxCombo >= livePlayer.total);
 
 		if (GlobalStatic.IsLoggedIn) {
 			StartCoroutine(HandleSubmitResult());
@@ -160,11 +195,13 @@ public class GameScheduler : MonoBehaviour {
 
 		willRetry = willShowMenu = false;
 		eventSystem.enabled = true;
-		uiCamera.enabled = true;
+		pointer.SetActive(true);
+//		uiCamera.enabled = true;
 		while (!willRetry && !willShowMenu)
 			yield return null;
-		uiCamera.enabled = false;
+//		uiCamera.enabled = false;
 		eventSystem.enabled = false;
+		pointer.SetActive(false);
 
 		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
 			uiResultPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 0), new Vector2(0, 5000), step);
@@ -183,10 +220,21 @@ public class GameScheduler : MonoBehaviour {
 		}
 	}
 
+	IEnumerator HandleCloseHintPanel() {
+		yield return Wait(5);
+		TweenManager.AddTween(new Tween(4, Uif.EasingType.Circ, Uif.EasingPhase.In, step => {
+			uiHintPanel.anchoredPosition3D = Vector3.LerpUnclamped(Vector3.zero, new Vector3(0, 0, 10000), step);
+		}, () => uiHintPanel.gameObject.SetActive(false)));
+	}
+
 	IEnumerator HandleSubmitResult() {
+		if (string.IsNullOrEmpty(mapHash) || !GlobalStatic.IsLoggedIn) {
+			yield break;
+		}
+
 		var form = new WWWForm();
-		form.AddField("hash", osuFile.BeatmapID);
-		form.AddField("name", osuFile.TitleUnicode);
+		form.AddField("hash", mapHash);
+		form.AddField("name", mapName);
 		form.AddField("accuracy", acc.ToString());
 		form.AddField("combo", livePlayer.combo);
 		form.AddField("score", livePlayer.score);
@@ -214,8 +262,12 @@ public class GameScheduler : MonoBehaviour {
 	}
 
 	IEnumerator HandleRankInit() {
+		if (string.IsNullOrEmpty(mapHash)) {
+			yield break;
+		}
+
 		var form = new WWWForm();
-		form.AddField("hash", osuFile.BeatmapID);
+		form.AddField("hash", mapHash);
 		form.AddField("count", 10);
 
 		using (var req = UnityWebRequest.Post(ApiUrl + "/trials/ranking", form)) {
@@ -303,7 +355,20 @@ public class GameScheduler : MonoBehaviour {
 	}
 
 	public void OnOsuSongSelected(OsuFile file) {
+		selectedFileType = 0;
 		osuFile = file;
+		mapHash = file.BeatmapID;
+		mapVersion = file.Version;
+		mapName = file.TitleUnicode;
+		isSongSelectFinished = true;
+	}
+
+	public void OnLlpSongSelected(ApiLive live) {
+		selectedFileType = 1;
+		this.live = live;
+		mapHash = live.live_id;
+		mapVersion = live.category.name;
+		mapName = live.live_name;
 		isSongSelectFinished = true;
 	}
 
