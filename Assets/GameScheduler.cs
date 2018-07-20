@@ -75,44 +75,22 @@ public class GameScheduler : MonoBehaviour {
 			uiWelcomePanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(0, 0), step);
 		}));
 
-		yield return Wait(1);
+//		yield return Wait(1);
 
-		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
+		TweenManager.AddTween(panelHideTween.CreateTransition(step => {
 			uiWelcomePanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 0), new Vector2(0, -5000), step);
 		}));
 		uiWelcomePanel.gameObject.SetActive(false);
 
-
-		uiLoginPanel.gameObject.SetActive(true);
-		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
-			uiLoginPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(0, 80), step);
-		}));
-
-
-		if (!string.IsNullOrEmpty(PlayerPrefs.GetString("friend_name", ""))) {
-			uiLoginNameInput.text = PlayerPrefs.GetString("friend_name");
-			uiLoginPassInput.text = PlayerPrefs.GetString("friend_pass");
-			OnLoginButtonClicked();
-		}
-
-		isLoginFinished = false;
-		eventSystem.enabled = true;
-		pointer.SetActive(true);
-		while (!isLoginFinished)
-			yield return null;
-		eventSystem.enabled = false;
-		pointer.SetActive(false);
-
-		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
-			uiLoginPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 80), new Vector2(0, -5000), step);
-		}));
-		uiLoginPanel.gameObject.SetActive(false);
 
 		SONG_SELECT:
 		uiSongPanel.gameObject.SetActive(true);
 		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
 			uiSongPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 5000), new Vector2(0, 0), step);
 		}));
+		uiSongPanel.GetComponent<SongUiController>().FetchProgress();
+
+		if (!isLoginFinished) StartCoroutine(HandleAsyncLogin());
 
 		eventSystem.enabled = true;
 		pointer.SetActive(true);
@@ -127,6 +105,9 @@ public class GameScheduler : MonoBehaviour {
 		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
 			uiSongPanel.anchoredPosition = Vector2.LerpUnclamped(new Vector2(0, 0), new Vector2(0, -5000), step);
 		}));
+
+		if (!isLoginFinished) OnLoginCancelButtonClicked();
+
 		uiSongPanel.gameObject.SetActive(false);
 
 //		uiCamera.enabled = false;
@@ -218,6 +199,32 @@ public class GameScheduler : MonoBehaviour {
 		} else {
 			goto SONG_SELECT;
 		}
+	}
+
+	IEnumerator HandleAsyncLogin() {
+		uiLoginPanel.gameObject.SetActive(true);
+		yield return TweenManager.AddTween(panelShowTween.CreateTransition(step => {
+			uiLoginPanel.anchoredPosition3D = Vector3.LerpUnclamped(new Vector2(0, 5000), new Vector3(560, 80, -70), step);
+		}));
+
+		if (!string.IsNullOrEmpty(PlayerPrefs.GetString("friend_name", ""))) {
+			uiLoginNameInput.text = PlayerPrefs.GetString("friend_name");
+			uiLoginPassInput.text = PlayerPrefs.GetString("friend_pass");
+			OnLoginButtonClicked();
+		}
+
+		isLoginFinished = false;
+//		eventSystem.enabled = true;
+//		pointer.SetActive(true);
+		while (!isLoginFinished)
+			yield return null;
+//		eventSystem.enabled = false;
+//		pointer.SetActive(false);
+
+		yield return TweenManager.AddTween(panelHideTween.CreateTransition(step => {
+			uiLoginPanel.anchoredPosition3D = Vector3.LerpUnclamped(new Vector3(560, 80, -70), new Vector2(0, -5000), step);
+		}));
+		uiLoginPanel.gameObject.SetActive(false);
 	}
 
 	IEnumerator HandleCloseHintPanel() {
@@ -313,6 +320,8 @@ public class GameScheduler : MonoBehaviour {
 				isLoginFinished = true;
 			}
 		}
+
+		uiSongPanel.GetComponent<SongUiController>().FetchProgress();
 
 		eventSystem.enabled = true;
 	}

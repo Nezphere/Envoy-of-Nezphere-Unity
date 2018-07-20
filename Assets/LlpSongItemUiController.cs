@@ -25,6 +25,10 @@ public class LlpSongItemUiController : MonoBehaviour {
 			"--", 
 			"--");
 
+		FetchProgress();
+	}
+
+	public void FetchProgress() {
 		if (GlobalStatic.IsLoggedIn) {
 			StartCoroutine(InitHandler());
 		}
@@ -40,6 +44,7 @@ public class LlpSongItemUiController : MonoBehaviour {
 
 		using (var req = UnityWebRequest.Post(GameScheduler.ApiUrl + "/trials/high-score", form)) {
 			yield return req.SendWebRequest();
+			Debug.Log(req.downloadHandler.text);
 			if (!req.isNetworkError && !req.isHttpError) {
 				var segs = req.downloadHandler.text.Split(new [] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);
 				uiRightText.text = string.Format(

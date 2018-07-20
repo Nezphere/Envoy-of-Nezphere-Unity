@@ -31,7 +31,7 @@ public class LiveImporter : MonoBehaviour {
 		File.WriteAllText(mapLocalPath, mapJson);
 
 		var bgmRemotePath = RemotePath + @"\bgms\" + live.bgm_path;
-		var bgmLocalPath = LocalPath + @"\bgms\" + live.bgm_path;
+		var bgmLocalPath = LocalPath + @"\bgms\" + live.bgm_path + @".bytes";
 		byte[] bgmBytes = File.ReadAllBytes(bgmRemotePath);
 		File.WriteAllBytes(bgmLocalPath, bgmBytes);
 	}

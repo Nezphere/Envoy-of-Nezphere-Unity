@@ -48,6 +48,16 @@ public class SongUiController : MonoBehaviour {
 		}
 	}
 
+	public void FetchProgress() {
+		foreach (var songItem in GetComponentsInChildren<SongItemUiController>()) {
+			songItem.FetchProgress();
+		}
+
+		foreach (var songItem in GetComponentsInChildren<LlpSongItemUiController>()) {
+			songItem.FetchProgress();
+		}
+	}
+
 	public void ExtractZipFile(string archiveFilenameIn, string outFolder) {
 		ZipFile zf = null;
 		try {

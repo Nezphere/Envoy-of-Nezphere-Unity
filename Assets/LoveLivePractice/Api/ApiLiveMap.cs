@@ -20,17 +20,38 @@ namespace LoveLivePractice.Api {
 			int counter = 0;
 			var list = new System.Collections.Generic.List<LiveNote>();
 
-			foreach (var note in lane) {
+			for (int i = 0; i < lane.Length; i++) {
+				var note = lane[i];
+
 				if (counter % level == 0) {
 					list.Add(new LiveNote(
 						transformer(note.lane, 0), 
 						note.starttime / 1000f, 
-						false, 
+						note.parallel, 
 						note.longnote));
+
+					if (note.parallel) {
+						if (i > 0 && System.Math.Abs(lane[i - 1].starttime - note.starttime) < 1) {
+							note = lane[i - 1];
+							list.Add(new LiveNote(
+								transformer(note.lane, 0), 
+								note.starttime / 1000f, 
+								note.parallel, 
+								note.longnote));
+						} else if (i < lane.Length - 1 && System.Math.Abs(lane[i + 1].starttime - note.starttime) < 1) {
+							note = lane[i + 1];
+							list.Add(new LiveNote(
+								transformer(note.lane, 0), 
+								note.starttime / 1000f, 
+								note.parallel, 
+								note.longnote));
+						}
+					}
 				}
 
 				counter += 1;
 			}
+
 			return list.ToArray();
 		}
 	}

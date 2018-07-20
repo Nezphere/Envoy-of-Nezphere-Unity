@@ -596,7 +596,7 @@ public class LivePlayer : MonoBehaviour {
 //			block.uiJudgeText.color = new Color(1, 1, 1, inverse);
 //			block.uiComboText.color = new Color(1, 1, 1, inverse);
 			block.uiScoreText.transform.localScale = size;
-			block.uiJudgeText.transform.localScale = size;
+			block.uiJudgeText.transform.localScale = size * 1.6f;
 			block.uiComboText.transform.localScale = size;
 		}));
 	}
